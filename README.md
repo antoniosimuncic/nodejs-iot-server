@@ -1,21 +1,31 @@
-# Node.js IoT server
+# IoT Sensor Data Collection server
 
-## **IoT Sensor Data Collection System**
 This project implements a simple server to receive, store, and retrieve IoT sensor data using Node.js. The focus is on manually handling HTTP requests without using frameworks.
 
 ## **Features**
-- Recieves data from IoT devices via HTTP requests
+- Receives data from IoT devices via HTTP requests
 - Stores sensor readings such as temperature, humidity, CO2, and PM values
 - Retrieves stored data for further analysis
 
 ## **Technology Stack**
 - **Node.js**: Handles HTTP requests and responses
 - **Arduino**: Framework used to program the ESP32-S3 microcontroller
-- **ESP32-S3**: Sends sensor data to the server via HTTP POST.
+- **Espressif ESP32-S3**: Sends sensor data to the server via HTTP POST.
 - **JSON**: Used for data transmission.
 
 
 ## API
+
+### Functionalities:
+
+| Endpoint            | Method | Description                                    |
+|---------------------|--------|------------------------------------------------|
+| `/devices`          | POST   | Add or update a device                        |
+| `/sensor-readings`  | POST   | Submit sensor readings                        |
+| `/sensor-readings`  | GET    | Retrieve the latest sensor readings           |
+| `/devices`          | GET    | Retrieve all registered devices               |
+
+---
 
 ### Database Tables:
 1. **Devices** (for tracking devices sending data):
@@ -38,21 +48,11 @@ This project implements a simple server to receive, store, and retrieve IoT sens
 
 3. **Alerts** (for tracking alerts):
    - `id` (primary key)
-   - `device_id` (foreign key)
+   - `device_id` (foreign key linked to the Devices table)
    - `alert_type` (e.g., high CO2 level)
    - `created_at` (time of alert creation)
 
 ---
-
-### API Functionalities:
-
-| Endpoint            | Method | Description                                    |
-|---------------------|--------|------------------------------------------------|
-| `/devices`          | POST   | Add or update a device                        |
-| `/sensor-readings`  | POST   | Submit sensor readings                        |
-| `/sensor-readings`  | GET    | Retrieve the latest sensor readings           |
-| `/devices`          | GET    | Retrieve all registered devices               |
-
 
 1. **Add or Update a Device Using MAC Address** (POST `/devices`):
    - Request body:
