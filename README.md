@@ -45,6 +45,15 @@ This project implements a simple server to receive, store, and retrieve IoT sens
 ---
 
 ### API Functionalities:
+
+| Endpoint            | Method | Description                                    |
+|---------------------|--------|------------------------------------------------|
+| `/devices`          | POST   | Add or update a device                        |
+| `/sensor-readings`  | POST   | Submit sensor readings                        |
+| `/sensor-readings`  | GET    | Retrieve the latest sensor readings           |
+| `/devices`          | GET    | Retrieve all registered devices               |
+
+
 1. **Add or Update a Device Using MAC Address** (POST `/devices`):
    - Request body:
    ```json
@@ -88,6 +97,7 @@ This project implements a simple server to receive, store, and retrieve IoT sens
    - If CO2 or VOC levels exceed a specified threshold, the API can store an alert in the `Alerts` table.
 
 ---
+
 
 
 
