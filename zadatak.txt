@@ -1,0 +1,8 @@
+Odabrati projekt
+(cca 3 tablice u bazi će biti dovoljne)
+Implementirati API koji će omogućiti rad projekta 
+primjer: posudbe
+ima tablice stvari i prijatelji, te tablicu za evidenciju posudbi 
+(kome smo posudili koju stvar, čekić, kosilica, knjiga) i kada je očekujemo nazad
+
+Odabrani projekt je ujedno i K1 dio ispita
