@@ -183,3 +183,69 @@ app.get('/api/podaci', (req, res) => {
 
 ### 6. **Zaključak**
 Ovaj projekt omogućava prikupljanje, slanje i pohranjivanje podataka sa IoT senzora, a koristići Node.js i SQLite kao backend, dobijaš jednostavan, skalabilan sistem za pohranu podataka. Ovaj sistem može biti proširen sa dodatnim senzorima, funkcionalnostima za analizu podataka ili vizualizacijom u stvarnom vremenu.
+
+
+Here’s the SQL script to create the database with the described tables:
+
+sql
+Copy code
+-- Create the Devices table
+CREATE TABLE Devices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- Auto-incrementing primary key
+    mac_address TEXT UNIQUE NOT NULL,     -- Unique MAC address
+    device_name TEXT,                     -- Optional device name
+    location TEXT,                        -- Device location
+    last_active DATETIME                  -- Timestamp of last activity
+);
+
+-- Create the SensorReadings table
+CREATE TABLE SensorReadings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- Auto-incrementing primary key
+    device_id INTEGER NOT NULL,           -- Foreign key referencing Devices
+    temperature REAL,                     -- Temperature in Celsius
+    humidity REAL,                        -- Humidity in percentage
+    pm1 REAL,                             -- PM1 concentration in µg/m³
+    pm2_5 REAL,                           -- PM2.5 concentration in µg/m³
+    pm4 REAL,                             -- PM4 concentration in µg/m³
+    pm10 REAL,                            -- PM10 concentration in µg/m³
+    co2 REAL,                             -- CO2 concentration in ppm
+    voc REAL,                             -- VOC index (0-500)
+    pressure REAL,                        -- Atmospheric pressure in hPa
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, -- Time of reading
+    FOREIGN KEY (device_id) REFERENCES Devices (id) -- Reference to Devices table
+);
+
+-- Create the Alerts table
+CREATE TABLE Alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- Auto-incrementing primary key
+    device_id INTEGER NOT NULL,           -- Foreign key referencing Devices
+    alert_type TEXT NOT NULL,             -- Type of alert (e.g., high CO2)
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- Time of alert creation
+    FOREIGN KEY (device_id) REFERENCES Devices (id) -- Reference to Devices table
+);
+Explanation:
+Devices Table:
+
+Tracks devices using mac_address.
+Includes optional fields like device_name and location for additional information.
+last_active helps monitor the device's activity status.
+SensorReadings Table:
+
+Stores sensor data linked to a device using device_id.
+Includes fields for all the sensor readings and a timestamp.
+Alerts Table:
+
+Stores alerts with the alert_type and the associated device_id.
+Tracks when the alert was created.
+Key Points:
+The mac_address in Devices is unique to prevent duplicate entries for the same device.
+The SensorReadings table references the Devices table to associate readings with specific devices.
+The Alerts table also references the Devices table to link alerts to devices.
+Timestamps default to the current time for SensorReadings and Alerts to simplify insertion.
+Let me know if you need a script for sample data or database initialization!
+
+
+
+
+
+
