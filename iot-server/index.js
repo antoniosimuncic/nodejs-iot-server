@@ -1,68 +1,61 @@
-const http=require("http");
-const fs=require("fs");
-const mime=require("mime-types")
-const url=require("node:url");
+const http = require("http");
+const fs = require("fs");
+const mime = require("mime-types");
+const url = require("node:url");
 
-const handlers=require("./handlers");
+const handlers = require("./handlers");
 
-function serveStatic(req,res){
-    const method=req.method;
-    if (method!="GET") return false;
+function serveStatic(req, res) {
+    const method = req.method;
+    if (method != "GET") return false;
 
-    const url=req.url;
-    let doc="./public"+url;
-    if (doc.endsWith("/")) doc=doc+"index.html"
+    const url = req.url;
+    let doc = "./public" + url;
+    if (doc.endsWith("/")) doc = doc + "index.html";
 
-    try{
-        let data=fs.readFileSync(doc);
-        let mt=mime.lookup(doc)
-        res.writeHead(200,{"Content-type":mt});
+    try {
+        let data = fs.readFileSync(doc);
+        let mt = mime.lookup(doc);
+        res.writeHead(200, { "Content-type": mt });
         res.write(data);
         res.end();
         return true;
-    }catch(err){
+    } catch (err) {
         return false;
     }
-    
 }
 
-function obradiZahtjev(req,res){
-    let data="";
-    req.on("data",function(part){
-        data=data+part;
+function handleRequest(req, res) {
+    let data = "";
+    req.on("data", function (part) {
+        data = data + part;
     });
 
-    req.on("end",function(){
-        const headers=req.headers;
-        let q=new url.URL(req.url,"http://localhost/");
-        let pathname=q.pathname;
-        //const url=req.url;
-        const method=req.method;
-        let handled=false;
-        let handler=handlers.get(pathname)
-        if (handler!=undefined){
-            // dinamičke stranice
-            if (req.headers["content-type"]=="application/json"){
-                data=JSON.parse(data);
+    req.on("end", function () {
+        const headers = req.headers;
+        let q = new url.URL(req.url, "http://localhost/");
+        let pathname = q.pathname;
+        const method = req.method;
+        let handled = false;
+        let handler = handlers.get(pathname);
+
+        if (handler != undefined) {
+            if (req.headers["content-type"] == "application/json") {
+                data = JSON.parse(data);
             }
-            handled=handler(req,res,q,data)
+            handled = handler(req, res, q, data);
         }
-    
-        if (!handled){
-            // statičke
-            handled=serveStatic(req,res)   
+
+        if (!handled) {
+            handled = serveStatic(req, res);
         }
-    
-        if (!handled){
-            // error
-            res.statusCode=404;
+
+        if (!handled) {
+            res.statusCode = 404;
             res.end();
-        } 
+        }
     });
-
-
-
-    
 }
-const server=http.createServer(obradiZahtjev)
+
+const server = http.createServer(handleRequest);
 server.listen(8080);
