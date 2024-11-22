@@ -39,7 +39,44 @@ function _Devices(req, res, q, data) {
         res.end();
         return true;
     }
-    // POST request here
+    // POST request here - TODO
+    else if (req.method === 'POST') {
+        const mac_address = sp.get("mac_address");
+        const device_name = sp.get("device_name");
+        const location = sp.get("location");
+
+        const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
+        db.open();
+
+        // Check if the device exists
+        const checkDeviceSql = "SELECT * FROM Devices WHERE mac_address = :mac_address";
+        const existingDevice = db.prepare(checkDeviceSql).get({ mac_address });
+        console.log(existingDevice);
+    
+        if (existingDevice){
+            // Update exisitng device
+            const updateSql = `
+            UPDATE Devices 
+            SET device_name = :device_name, location = :location, last_active = CURRENT_TIMESTAMP 
+            WHERE mac_address = :mac_address
+            `;
+            db.prepare(updateSql).run({ mac_address, device_name, location });
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({ message: "Device updated successfully" }));
+        } else {
+            // Insert new device
+            const insertSql = `
+            INSERT INTO Devices (mac_address, device_name, location) 
+            VALUES (:mac_address, :device_name, :location)
+        `;
+            db.prepare(insertSql).run({ mac_address, device_name, location });
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({ message: "New device added successfully" }));
+        }
+    res.end()
+    db.close()
+    return true;
+    }
 
     return false;
 }
