@@ -108,6 +108,7 @@ This project implements a simple server to receive, store, and retrieve IoT sens
       4. If an internal error occurs, returns: `500` - message: "Internal Server Error: " + `error.message`
 
 
+# TODO
 2. **Send Sensor Readings** (POST `/sensor-readings`):
    - Request body:
      ```json
