@@ -20,10 +20,13 @@ This project implements a simple server to receive, store, and retrieve IoT sens
 
 | Endpoint            | Method | Description                                    |
 |---------------------|--------|------------------------------------------------|
-| `/devices`          | POST   | Add or update a device                        |
-| `/sensor-readings`  | POST   | Submit sensor readings                        |
-| `/sensor-readings`  | GET    | Retrieve the latest sensor readings           |
-| `/devices`          | GET    | Retrieve all registered devices               |
+| `/devices`          | POST   | Add a new device                               |
+| `/devices`          | GET    | Retrieve all or specified registered devices   |
+| `/devices`          | PUT    | Update a device                                |
+| `/devices`          | DELETE | Delete a device                                |
+| `/sensor-readings`  | POST   | Submit sensor readings                         |
+| `/sensor-readings`  | GET    | Retrieve all or specified sensor readings      |
+| `/alerts`           | GET    | Retrieve all or specified alert                |
 
 ---
 
@@ -54,7 +57,7 @@ This project implements a simple server to receive, store, and retrieve IoT sens
 
 ---
 
-1. **Add or Update a Device Using MAC Address** (POST `/devices`):
+1. **Add a New Device With a Unique MAC Address** (POST `/devices`):
    - Request body:
    ```json
    {
@@ -63,8 +66,47 @@ This project implements a simple server to receive, store, and retrieve IoT sens
      "location": "Office"
    }
    ```
-   - If the `mac_address` exists, update the `device_name`, `location`, or `last_active`.
-   - If it doesn't exist, create a new record in the `Devices` table.
+   - API:
+      1. Looks up the `Devices` table using the provided `mac_address`.
+      2. If not found, inserts new device into `Devices` and returns: `200` - message: "New device added successfully"
+      3. If found, returns:  `400` - message: "Device already exists! No changes were made."
+      4. If an internal error occurs, returns: `500` - message: "Internal Server Error: " + `error.message`
+ 
+
+2. **Get Devices** (GET `/devices`):
+   - Returns a list of all registered devices, including their `mac_address`, `device_name`, `location`, and `last_active`.
+   - Possible to filter request by using id or device_id to specify wanted results.
+
+3. **Update an Existing Device** (PUT `/devices`):
+   - Request body:
+   ```json
+   {
+     "mac_address": "AA:BB:CC:DD:EE:FF",
+     "device_name": "ESP32-S3",
+     "location": "Office"
+   }
+   ```
+   - API:
+      1. Looks up the `Devices` table using the provided `mac_address`.
+      2. If not found, returns: `400` - message: "Device update failed! No such device was found."
+      3. If found, sets the new values in `Devices` and returns: `200` - message: "Device updated successfully."
+      4. If an internal error occurs, returns: `500` - message: "Internal Server Error: " + `error.message`
+
+4. **Delete an Existing Device** (DELETE `/devices`):
+   - Request body:
+   ```json
+   {
+     "mac_address": "AA:BB:CC:DD:EE:FF",
+     "device_name": "ESP32-S3",
+     "location": "Office"
+   }
+   ```
+   - API:
+      1. Looks up the `Devices` table using the provided `mac_address`.
+      2. If not found, returns: `400` - message: "Device delete failed! No device with mac_address=${`mac_address`} was found."
+      3. If found, deletes the device from `Devices` and returns: `200` - message: "Device deleted successfully."
+      4. If an internal error occurs, returns: `500` - message: "Internal Server Error: " + `error.message`
+
 
 2. **Send Sensor Readings** (POST `/sensor-readings`):
    - Request body:
@@ -82,7 +124,7 @@ This project implements a simple server to receive, store, and retrieve IoT sens
        "pressure": 1013.25
      }
      ```
-   - The API:
+   - API:
      1. Looks up the `Devices` table using the provided `mac_address`.
      2. If found, inserts the readings into the `SensorReadings` table.
      3. Updates the `last_active` field for the device.
