@@ -2,45 +2,60 @@ const sqlite = require("node:sqlite");
 
 let handlers = new Map();
 
-// Handler to get all devices or specific device by id
+// List, add, modify or delete devices
 function _Devices(req, res, q, data) {
-    const sp=q.searchParams;
-    const id=sp.get("id");
+    const sp = q.searchParams;
+    const id = sp.get("id");
 
-    if (req.method == 'GET' && id == null) {
+    // List all devices or specific device by id from database
+    if (req.method == 'GET') {
         const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
         db.open();
-        const sql = "SELECT * FROM Devices";
-        const statement = db.prepare(sql);
-        const result = statement.all();
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.write(JSON.stringify(result));
-        db.close();
-        res.end();
-        return true;
-    }
 
-    else if (req.method == 'GET' && id != null) {
-        const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
-        db.open();
-        const sql = "SELECT * FROM Devices WHERE id=:id";
-        const params = {"id":id};
-        const statement = db.prepare(sql);
-        const result = statement.get(params);
-        if (result == undefined){
-            res.writeHead(404, { "Content-Type": "application/json" });
-            res.write(JSON.stringify({ message: "No changes made. Device already exists." }));
-            res.end();
-            db.close();
-            return true;
+        if (id == undefined) {
+            // Get all devices
+            const sql = "SELECT * FROM Devices";
+
+            const stmt = db.prepare(sql);
+            const result = stmt.all();
+
+            if (!result) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                res.write(JSON.stringify({ message: `No sensor readings found.` }));
+                res.end();
+                db.close();
+                return true;
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.write(JSON.stringify(result));
         }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.write(JSON.stringify(result));
+
+        else if (id != undefined) {
+            // Get a specific device by id
+            const sql = "SELECT * FROM Devices WHERE id=:id";
+
+            const stmt = db.prepare(sql);
+            const result = stmt.get({ id });
+
+            if (!result){
+                res.writeHead(404, { "Content-Type": "application/json" });
+                res.write(JSON.stringify({ message: `No device with id=${id} was found.` }));
+                res.end();
+                db.close();
+                return true;
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.write(JSON.stringify(result));
+        }
+
         db.close();
         res.end();
         return true;
     }
-    
+
+    // Insert new devices into database
     else if (req.method === 'POST') {
         const mac_address = sp.get("mac_address");
         const device_name = sp.get("device_name");
@@ -52,7 +67,7 @@ function _Devices(req, res, q, data) {
         // Check if the device exists
         const checkDeviceSql = "SELECT * FROM Devices WHERE mac_address = :mac_address";
         const existingDevice = db.prepare(checkDeviceSql).get({ mac_address });
-        console.log(existingDevice);
+        //console.log(existingDevice);
 
         if (existingDevice){
             // Error message - device already exists
@@ -74,6 +89,7 @@ function _Devices(req, res, q, data) {
         return true;
     }
 
+    // Modify existing devices in database
     else if (req.method === 'PUT') {
         const mac_address = sp.get("mac_address");
         const device_name = sp.get("device_name");
@@ -109,6 +125,7 @@ function _Devices(req, res, q, data) {
         return true;
     }
 
+    // Delete existing devices from database
     else if (req.method === 'DELETE') {
         const mac_address = sp.get("mac_address");
 
@@ -140,12 +157,16 @@ function _Devices(req, res, q, data) {
         res.end()
         db.close()
         return true;
+    } else {
+        res.writeHead(405, { "Content-Type": "application/json" });
+        res.write(JSON.stringify({ message: "Method not allowed" }));
+        res.end();
+        db.close();
+        return true;
     }
-
-    return false;
 }
 
-
+// List or add sensor readings
 function _SensorReadings(req, res, q, data) {
     const sp = q.searchParams;
     const id = sp.get("id");
@@ -273,7 +294,7 @@ function _SensorReadings(req, res, q, data) {
         return true;
     }
 
-    if (req.method === 'POST') {
+    else if (req.method === 'POST') {
         const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
         db.open();
 
@@ -281,10 +302,11 @@ function _SensorReadings(req, res, q, data) {
         const deviceSql = "SELECT id FROM Devices WHERE mac_address = :mac_address";
         const deviceStmt = db.prepare(deviceSql);
         const device = deviceStmt.get({ mac_address });
-
+        
+        // Deny request if no such device is found
         if (!device) {
-            res.statusCode = 404;
-            res.statusMessage = `Device not found`;
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({ message: `No device with mac_address=${mac_address} found.` }));
             res.end();
             db.close();
             return true;
@@ -319,9 +341,13 @@ function _SensorReadings(req, res, q, data) {
         db.close();
         res.end();
         return true;
+    } else {
+        res.writeHead(405, { "Content-Type": "application/json" });
+        res.write(JSON.stringify({ message: "Method not allowed" }));
+        res.end();
+        db.close();
+        return true;
     }
-
-    return false;
 }
 
 
