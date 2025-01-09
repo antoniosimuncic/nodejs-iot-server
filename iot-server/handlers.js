@@ -74,22 +74,24 @@ function _Devices(req, res, q, data) {
       }
     }
 
-    // Insert new devices into database
-    else if (req.method === 'POST') {
+    else if (req.method == 'POST') {
         try {
-            const mac_address = sp.get("mac_address");
-            const device_name = sp.get("device_name");
-            const location = sp.get("location");
+            if (data=='' || req.headers['content-type']!='application/json') {
+                res.statusCode = 406; // not acceptable - trebamo JSON objekt
+                res.statusMessage = "Not acceptable - missing JSON body";
+                res.end();
+                return true;
+            }
 
+            let params = data;
             const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
             db.open();
 
             // Check if the device exists
             const checkDeviceSql = "SELECT * FROM Devices WHERE mac_address = :mac_address";
-            const existingDevice = db.prepare(checkDeviceSql).get({ mac_address });
-            //console.log(existingDevice);
+            const existingDevice = db.prepare(checkDeviceSql).get({ mac_address: params.mac_address });
 
-            if (existingDevice){
+            if (existingDevice) {
                 // Error message - device already exists
                 res.writeHead(400, { "Content-Type": "application/json" });
                 res.write(JSON.stringify({ message: "Device already exists! No changes were made." }));
@@ -98,14 +100,15 @@ function _Devices(req, res, q, data) {
                 INSERT INTO Devices (mac_address, device_name, location) 
                 VALUES (:mac_address, :device_name, :location)
                 `;
-
-                db.prepare(insertSql).run({ mac_address, device_name, location });
-                res.writeHead(200, { "Content-Type": "application/json" }); // maybe 201 statusCode?
+                const statement = db.prepare(insertSql)
+                const result = statement.run(params);
+                params['id'] = result.lastInsertRowid;
+                res.writeHead(200, { "Content-Type": "application/json" });
                 res.write(JSON.stringify({ message: "New device added successfully" }));
+                //res.write(JSON.stringify(params));
             }
-
-            res.end()
-            db.close()
+            res.end();
+            db.close();
             return true;
         } catch (error) {
             res.writeHead(500, { "Content-Type": "application/json" });
@@ -340,6 +343,201 @@ function _SensorReadings(req, res, q, data) {
     }
     }
 
+    else if (req.method == 'POST') {
+        try {
+            if (data=='' || req.headers['content-type']!='application/json') {
+                res.statusCode = 406; // not acceptable - trebamo JSON objekt
+                res.statusMessage = "Not acceptable - missing JSON body";
+                res.end();
+                return true;
+            }
+
+            let params = data;
+            const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
+            db.open();
+
+            // Find device by mac_address
+            const deviceSql = "SELECT id FROM Devices WHERE mac_address = :mac_address";
+            const deviceStmt = db.prepare(deviceSql);
+            const device = deviceStmt.get({ mac_address: params.mac_address });
+
+            // Deny request if no such device is found
+            if (!device) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                res.write(JSON.stringify({ message: `No device with mac_address = ${params.mac_address} found.` }));
+                res.end();
+                db.close();
+                return true;
+            }
+
+            // Insert sensor readings
+            const insertSql = `
+                INSERT INTO SensorReadings (device_id, temperature, humidity, pm1, pm2_5, pm4, pm10, co2, voc, pressure)
+                VALUES (:device_id, :temperature, :humidity, :pm1, :pm2_5, :pm4, :pm10, :co2, :voc, :pressure)
+            `;
+            const insertStmt = db.prepare(insertSql);
+            const result = insertStmt.run(
+            {
+                device_id: device.id,
+                temperature: params.temperature,
+                humidity: params.humidity,
+                pm1: params.pm1,
+                pm2_5: params.pm2_5,
+                pm4: params.pm4,
+                pm10: params.pm10,
+                co2: params.co2,
+                voc: params.voc,
+                pressure: params.pressure
+            });
+            params['id'] = result.lastInsertRowid;
+
+            // Update last_active timestamp in Devices table
+            const updateDeviceSql = "UPDATE Devices SET last_active = CURRENT_TIMESTAMP WHERE id = :device_id";
+            const updateDeviceStmt = db.prepare(updateDeviceSql);
+            updateDeviceStmt.run({ device_id: device.id });
+
+            // Update the Alerts table
+            const alertSql = `
+            INSERT INTO Alerts (device_id, alert_type, created_at)
+            VALUES (:device_id, :alert_type, CURRENT_TIMESTAMP)
+            `;
+            const alertStmt = db.prepare(alertSql);
+
+            let alertMessage = ''
+
+            if (params.temperature > THRESHOLDS.temperature) {
+                alertStmt.run({ device_id: device.id, alert_type: 'High temperature' });
+                alertMessage += 'Alert: High temperature '
+            }
+            if (params.humidity > THRESHOLDS.humidity) {
+                alertStmt.run({ device_id: device.id, alert_type: 'High humidity' });
+                alertMessage += 'Alert: High humidity '
+            }
+            if (params.co2 > THRESHOLDS.co2) {
+                alertStmt.run({ device_id: device.id, alert_type: 'High CO2' });
+                alertMessage += 'Alert: High CO2 '
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({ message: `Sensor data stored successfully. ${alertMessage}` }));
+            db.close();
+            res.end();
+            return true;
+        } catch (error) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({ message: "Internal Server Error: " + error.message}));
+            res.end();
+            return true;
+        } 
+     
+    } else {
+        res.writeHead(405, { "Content-Type": "application/json" });
+        res.write(JSON.stringify({ message: "Method not allowed" }));
+        res.end();
+        return true;
+    } 
+}
+
+function _Alerts(req, res, q, data) {
+    const sp = q.searchParams;
+    const id = sp.get("id");
+    const device_id = sp.get("device_id");
+
+    // List all alerts or specific alert by id or device_id from database
+    if (req.method == 'GET') {
+        try {
+            const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
+            db.open();
+            if (id == undefined) {
+                // Get all devices
+                const sql = "SELECT * FROM Alerts";
+
+                const stmt = db.prepare(sql);
+                const result = stmt.all();
+
+                if (!result) {
+                    res.writeHead(404, { "Content-Type": "application/json" });
+                    res.write(JSON.stringify({ message: `No alerts found.` }));
+                    res.end();
+                    db.close();
+                    return true;
+                }
+
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.write(JSON.stringify(result));
+            }
+
+        } catch (error) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({ message: "Internal Server Error: " + error.message}));
+            res.end();
+            return true;
+        } 
+    } else {
+        res.writeHead(405, { "Content-Type": "application/json" });
+        res.write(JSON.stringify({ message: "Method not allowed" }));
+        res.end();
+        return true;
+    } 
+}
+
+
+handlers.set("/devices", _Devices);
+handlers.set("/sensor-readings", _SensorReadings);
+handlers.set("/alerts", _Alerts);
+
+module.exports = handlers;
+
+
+/****************************************************************************************************************/
+// OLD code
+
+// devices via q param
+    /*
+    // Insert new devices into database
+    else if (req.method === 'POST') {
+        try {
+            const mac_address = sp.get("mac_address");
+            const device_name = sp.get("device_name");
+            const location = sp.get("location");
+
+            const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
+            db.open();
+
+            // Check if the device exists
+            const checkDeviceSql = "SELECT * FROM Devices WHERE mac_address = :mac_address";
+            const existingDevice = db.prepare(checkDeviceSql).get({ mac_address });
+            //console.log(existingDevice);
+
+            if (existingDevice){
+                // Error message - device already exists
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.write(JSON.stringify({ message: "Device already exists! No changes were made." }));
+            } else {
+                const insertSql = `
+                INSERT INTO Devices (mac_address, device_name, location) 
+                VALUES (:mac_address, :device_name, :location)
+                `;
+
+                db.prepare(insertSql).run({ mac_address, device_name, location });
+                res.writeHead(200, { "Content-Type": "application/json" }); // maybe 201 statusCode?
+                res.write(JSON.stringify({ message: "New device added successfully" }));
+            }
+
+            res.end()
+            db.close()
+            return true;
+        } catch (error) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.write(JSON.stringify({ message: "Internal Server Error: " + error.message}));
+            res.end();
+            return true;
+        }
+    }
+    */
+
+//sensor reading via q param
+/*
     else if (req.method === 'POST') {
         try {
             const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
@@ -415,61 +613,4 @@ function _SensorReadings(req, res, q, data) {
             res.write(JSON.stringify({ message: "Internal Server Error: " + error.message}));
             res.end();
             return true;
-        } 
-    } else {
-        res.writeHead(405, { "Content-Type": "application/json" });
-        res.write(JSON.stringify({ message: "Method not allowed" }));
-        res.end();
-        return true;
-    } 
-}
-
-function _Alerts(req, res, q, data) {
-    const sp = q.searchParams;
-    const id = sp.get("id");
-    const device_id = sp.get("device_id");
-
-    // List all alerts or specific alert by id or device_id from database
-    if (req.method == 'GET') {
-        try {
-            const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
-            db.open();
-            if (id == undefined) {
-                // Get all devices
-                const sql = "SELECT * FROM Alerts";
-
-                const stmt = db.prepare(sql);
-                const result = stmt.all();
-
-                if (!result) {
-                    res.writeHead(404, { "Content-Type": "application/json" });
-                    res.write(JSON.stringify({ message: `No alerts found.` }));
-                    res.end();
-                    db.close();
-                    return true;
-                }
-
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.write(JSON.stringify(result));
-            }
-
-        } catch (error) {
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.write(JSON.stringify({ message: "Internal Server Error: " + error.message}));
-            res.end();
-            return true;
-        } 
-    } else {
-        res.writeHead(405, { "Content-Type": "application/json" });
-        res.write(JSON.stringify({ message: "Method not allowed" }));
-        res.end();
-        return true;
-    } 
-}
-
-
-handlers.set("/devices", _Devices);
-handlers.set("/sensor-readings", _SensorReadings);
-handlers.set("/alerts", _Alerts);
-
-module.exports = handlers;
+        }*/
