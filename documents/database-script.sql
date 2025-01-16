@@ -42,13 +42,11 @@ VALUES ('00:1A:7D:DA:71:13', 'Test ESP32-S3', 'Lab', CURRENT_TIMESTAMP);
 
 -- Insert some test sensor readings
 INSERT INTO SensorReadings (device_id, temperature, humidity, pm1, pm2_5, pm4, pm10, co2, voc, pressure) 
-VALUES 
-(1, 22.5, 45.0, 10, 20, 25, 30, 450, 100, 1013.25);
+VALUES (1, 22.5, 45.0, 10, 20, 25, 30, 450, 100, 1013.25);
 
 -- Insert a test alert
 INSERT INTO Alerts (device_id, alert_type) 
-VALUES 
-(1, 'High CO2 Level');
+VALUES (1, 'High CO2 Level');
 
 
 

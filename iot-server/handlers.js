@@ -4,13 +4,13 @@ let handlers = new Map();
 
 const THRESHOLDS = {
     temperature: 35, 
-    humidity: 80, 
-    pm1: 100, 
+    humidity: 70, 
+    pm1: 200, 
     pm2_5: 200,
     pm4: 250,
     pm10: 300,
-    co2: 1000,
-    voc: 200,
+    co2: 1500,
+    voc: 400,
     pressure: 1013.25
   };
 
