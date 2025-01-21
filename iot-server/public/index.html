@@ -1,35 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sensor Data Visualization</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0"></script> <!-- This is necessary for handling time in Chart.js -->
-</head>
-<body>
-  <div class="container">
-    <h1>Sensor Data Visualization</h1>
-    <canvas id="sensorChart"></canvas>
-  </div>
-
-  <script src="app.js"></script>
-</body>
-</html>
-
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>IoT Sensor Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Stranica indeksna</h1>
-    <img src="./js.png" width=100 height=100 alt="">
-    <img src="./jssdfsdfds.png" width=100 height=100 alt="">
+    <div class="dashboard-container">
+        <header>
+            <h1>IoT Sensor Dashboard</h1>
+        </header>
+        <main>
+          <div class="main-content">
+              <section class="manage-sensor">
+                  <h2>Manage Sensor</h2>
+                  <input type="text" id="mac_address" placeholder="Enter MAC Address">
+                  <input type="text" id="device_name" placeholder="Enter Device Name">
+                  <input type="text" id="location" placeholder="Enter Location">
+                  <div class="buttons">
+                      <button class="add-button">Add Sensor</button>
+                      <button class="rename-button">Rename</button>
+                      <button class="remove-button">Remove</button>
+                  </div>
+              </section>
+              <section class="motion-detected">
+                  <h2>Device List</h2>
+                  <table class="device-list">
+                      <thead>
+                          <tr>
+                              <th>Name</th>
+                              <th>MAC Address</th>
+                              <th>Location</th>
+                              <th>Last Active</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td>Sensor #1</td>
+                              <td>00:1B:44:11:3A:B7</td>
+                              <td>Office</td>
+                              <td>10:30 AM</td>
+                          </tr>
+                          <tr>
+                              <td>Sensor #2</td>
+                              <td>00:1B:44:21:4B:D9</td>
+                              <td>Lobby</td>
+                              <td>8:15 AM</td>
+                          </tr>
+                          <tr class="active-row">
+                              <td>Sensor #3</td>
+                              <td>00:1B:44:31:5C:FA</td>
+                              <td>Warehouse</td>
+                              <td>10:40 AM</td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </section>
+          </div>
+          <section class="charts">
+              <div class="chart" id="temperature-chart"></div>
+              <div class="chart" id="humidity-chart"></div>
+              <div class="chart" id="pressure-chart"></div>
+              <div class="chart" id="co2-chart"></div>
+              <div class="chart" id="voc-chart"></div>
+              <div class="chart" id="pm1-chart"></div>
+              <div class="chart" id="pm2_5-chart"></div>
+              <div class="chart" id="pm4-chart"></div>
+              <div class="chart" id="pm10-chart"></div>
+          </section>
+      </main>      
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
 </body>
-</html> -->
+</html>

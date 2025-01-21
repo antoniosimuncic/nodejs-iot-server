@@ -17,7 +17,7 @@ const THRESHOLDS = {
 // List, add, modify or delete devices
 function _Devices(req, res, q, data) {
     const sp = q.searchParams;
-    const id = sp.get("id");
+    const mac_address = sp.get("mac_address");
 
     // List all devices or specific device by id from database
     if (req.method == 'GET') {
@@ -25,7 +25,7 @@ function _Devices(req, res, q, data) {
             const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
             db.open();
 
-            if (id == undefined) {
+            if (mac_address == undefined) {
                 // Get all devices
                 const sql = "SELECT * FROM Devices";
 
@@ -44,16 +44,16 @@ function _Devices(req, res, q, data) {
                 res.write(JSON.stringify(result));
             }
 
-            else if (id != undefined) {
-                // Get a specific device by id
-                const sql = "SELECT * FROM Devices WHERE id=:id";
+            else if (mac_address != undefined) {
+                // Get a specific device by mac_address
+                const sql = "SELECT * FROM Devices WHERE mac_address=:mac_address";
 
                 const stmt = db.prepare(sql);
-                const result = stmt.get({ id });
+                const result = stmt.get({ mac_address });
 
                 if (!result){
                     res.writeHead(404, { "Content-Type": "application/json" });
-                    res.write(JSON.stringify({ message: `No device with id=${id} was found.` }));
+                    res.write(JSON.stringify({ message: `No device with mac_address=${mac_address} was found.` }));
                     res.end();
                     db.close();
                     return true;

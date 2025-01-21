@@ -1,38 +1,198 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+:root {
+  --primary-color: #007acc;
+  --secondary-color: #569CD6;
+  --third-color: #3e3e42;
+  --background-color: #1e1e1e;
+  --text-color: #FFFFFF;
+  --window-color: #2d2d30;
+  --danger-color: #e53e3e;
+  --hover-color: #007ACC;
+  --table-color: #3e3e42;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+header {
+  background-color: var(--primary-color); /* Main accent color */
+  color: white;
+  padding: 15px 20px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  margin: auto;
+}
+
+.add-sensor-button:hover {
+  background-color: var(--hover-color);
+}
+
+.dashboard-container {
+  max-width: 1800px; /* Restrict the maximum width */
+  margin: 0 auto; /* Center the container */
+  padding: 20px;
+}
+
+.main-content {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+
+/***** Manage Sensor *****/
+
+.manage-sensor {
+  flex: 1;
+  max-width: 30.5%;
+  background: var(--window-color);
+  border-radius: 15px;
+  padding: 20px;
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+}
+
+.motion-detected {
+  flex: 2;
+  max-width: 66%;
+  background: var(--window-color);
+  border-radius: 15px;
+  padding: 20px;
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+}
+
+.manage-sensor h2, .motion-detected h2 {
+  margin-top: 0;
+}
+
+.manage-sensor input {
+  display: block;
+  width: 96%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 0px solid var(--background-color);
+  border-radius: 5px;
+  background-color: var(--third-color);
+  color: white;
+}
+
+
+/***** Buttons *****/
+
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-button {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.rename-button {
+  background-color: var(--background-color);
+  color: white;
+}
+
+.remove-button {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+
+/***** Device List table *****/
+
+.motion-detected table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  border-radius: 15px 10px 0 0;
+  overflow: hidden;
+  min-width: 300px;
+}
+
+.motion-detected th {
+  background-color: var(--primary-color);
+  color: white;
+  text-align: left;
+  font-weight: bold;
+}
+
+.motion-detected th, .motion-detected td {
+  padding: 10px 15px;
+}
+
+.motion-detected tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.motion-detected tbody tr:nth-of-type(even) {
+  background-color: #3e3e42;
+}
+
+.motion-detected tbody tr:last-of-type {
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.motion-detected tbody tr.active-row {
+  font-weight: bold;
+  color: var(--secondary-color);
+}
+
+/***** Charts *****/
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid for charts */
+  gap: 20px;
+}
+
+.chart {
+  background: var(--window-color);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Restrict to a maximum of 3 charts per row */
+@media (min-width: 1200px) {
+  .charts {
+      grid-template-columns: repeat(3, 1fr);
   }
-  
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 900px) {
+  .main-content {
+      flex-direction: column;
   }
-  
-  .container {
-    text-align: center;
-    max-width: 100%;
-    width: 100%;
-    height: 100%;
+
+  .manage-sensor, .motion-detected {
+      max-width: 100%;
+      
   }
-  
-  h1 {
-    color: #333;
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
+  .motion-detected table {
+    font-size: 0.7em;
   }
-  
-  canvas {
-    width: 100vw;
-    height: 100vh;
-    display: block;
+
+  .charts {
+      grid-template-columns: 1fr; /* Stack charts vertically on mobile */
   }
-  
+}

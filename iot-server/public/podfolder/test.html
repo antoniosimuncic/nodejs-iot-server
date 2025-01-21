@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Form</title>
+</head>
+<body>
+  <form id="device-form">
+    <label for="macAddress">MAC Address:</label>
+    <input type="text" id="macAddress" name="macAddress" placeholder="Enter MAC Address" required />
+    <button type="button" id="loadDevice">Load Device</button>
+
+    <div id="form-fields" style="display:none;">
+      <label for="deviceName">Device Name:</label>
+      <input type="text" id="deviceName" name="deviceName" />
+
+      <label for="location">Location:</label>
+      <input type="text" id="location" name="location" />
+
+      <label for="lastActive">Last Active:</label>
+      <input type="text" id="lastActive" name="lastActive" />
+
+      <button type="button" id="saveDevice">Save Device</button>
+    </div>
+  </form>
+
+  <!-- <form id="device-form">
+    <label for="macAddress">MAC Address:</label>
+    <input type="text" id="macAddress" name="macAddress" required />
+  
+    <label for="deviceName">Device Name:</label>
+    <input type="text" id="deviceName" name="deviceName" required />
+  
+    <label for="location">Location:</label>
+    <input type="text" id="location" name="location" />
+  
+    <label for="lastActive">Last Active:</label>
+    <input type="text" id="lastActive" name="lastActive" readonly />
+  
+    <button type="button" id="searchDevice">Search</button>
+    <button type="button" id="saveDevice">Save</button>
+  </form> -->
+
+<script>
+    document.getElementById("searchDevice").addEventListener("click", function () {
+      const macAddress = document.getElementById("macAddress").value.trim();
+    
+      if (!macAddress) {
+        alert("Please enter a MAC Address.");
+        return;
+      }
+    
+      fetch(`/devices?mac_address=${encodeURIComponent(macAddress)}`)
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else if (response.status === 404) {
+            alert("Device not found. You can create a new one.");
+            document.getElementById("device-form").reset();
+            document.getElementById("lastActive").value = ""; // Ensure `last_active` is blank
+            return null;
+          } else {
+            throw new Error("Error retrieving device data.");
+          }
+        })
+        .then((device) => {
+          if (device) {
+            document.getElementById("deviceName").value = device.device_name || "";
+            document.getElementById("location").value = device.location || "";
+            document.getElementById("lastActive").value = device.last_active || ""; // Populate `last_active`
+          }
+        })
+        .catch((error) => {
+          alert(`Error: ${error.message}`);
+        });
+    });
+
+    document.getElementById("loadDevice").addEventListener("click", function () {
+      const macAddress = document.getElementById("macAddress").value.trim();
+
+      if (!macAddress) {
+        alert("Please enter a MAC Address.");
+        return;
+      }
+
+      fetch(`/devices?mac_address=${encodeURIComponent(macAddress)}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Device not found.");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          document.getElementById("deviceName").value = data.device_name || "";
+          document.getElementById("location").value = data.location || "";
+          document.getElementById("lastActive").value = data.last_active || "";
+          document.getElementById("form-fields").style.display = "block";
+        })
+        .catch((error) => {
+          alert(`${error.message} You can create a new device.`);
+          document.getElementById("deviceName").value = "";
+          document.getElementById("location").value = "";
+          document.getElementById("lastActive").value = "";
+          document.getElementById("form-fields").style.display = "block";
+        });
+    });
+    
+    document.getElementById("saveDevice").addEventListener("click", function () {
+      const macAddress = document.getElementById("macAddress").value.trim();
+      const deviceName = document.getElementById("deviceName").value.trim();
+      const location = document.getElementById("location").value.trim();
+      const lastActive = document.getElementById("lastActive").value.trim();
+
+      if (!macAddress || !deviceName) {
+        alert("MAC Address or Device Name are required.");
+        return;
+      }
+
+      const payload = {
+        mac_address: macAddress,
+        device_name: deviceName,
+        location: location
+      };
+
+      fetch(`/devices`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to save device.");
+          }
+          return response.json();
+        })
+        .then(() => {
+          alert("Device saved successfully!");
+          document.getElementById("form-fields").style.display = "none";
+          document.getElementById("device-form").reset();
+        })
+        .catch((error) => {
+          alert(`Error: ${error.message}`);
+        });
+    });
+  </script>
+</body>
+</html>
+
+<!--#############################################################################-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Form</title>
+</head>
+<body>
+  <form id="device-form">
+    <label for="macAddress">MAC Address:</label>
+    <input type="text" id="macAddress" name="macAddress" placeholder="Enter MAC Address" required />
+    <button type="button" id="loadDevice">Load Device</button>
+
+    <div id="form-fields" style="display:none;">
+      <label for="deviceName">Device Name:</label>
+      <input type="text" id="deviceName" name="deviceName" />
+
+      <label for="location">Location:</label>
+      <input type="text" id="location" name="location" />
+
+      <label for="lastActive">Last Active:</label>
+      <input type="text" id="lastActive" name="lastActive" />
+
+      <button type="button" id="saveDevice">Save Device</button>
+    </div>
+  </form>
+
+  <!-- <form id="device-form">
+    <label for="macAddress">MAC Address:</label>
+    <input type="text" id="macAddress" name="macAddress" required />
+  
+    <label for="deviceName">Device Name:</label>
+    <input type="text" id="deviceName" name="deviceName" required />
+  
+    <label for="location">Location:</label>
+    <input type="text" id="location" name="location" />
+  
+    <label for="lastActive">Last Active:</label>
+    <input type="text" id="lastActive" name="lastActive" readonly />
+  
+    <button type="button" id="searchDevice">Search</button>
+    <button type="button" id="saveDevice">Save</button>
+  </form> -->
+  
+
+<script>
+    document.getElementById("searchDevice").addEventListener("click", function () {
+      const macAddress = document.getElementById("macAddress").value.trim();
+    
+      if (!macAddress) {
+        alert("Please enter a MAC Address.");
+        return;
+      }
+    
+      fetch(`/devices?mac_address=${encodeURIComponent(macAddress)}`)
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else if (response.status === 404) {
+            alert("Device not found. You can create a new one.");
+            document.getElementById("device-form").reset();
+            document.getElementById("lastActive").value = ""; // Ensure `last_active` is blank
+            return null;
+          } else {
+            throw new Error("Error retrieving device data.");
+          }
+        })
+        .then((device) => {
+          if (device) {
+            document.getElementById("deviceName").value = device.device_name || "";
+            document.getElementById("location").value = device.location || "";
+            document.getElementById("lastActive").value = device.last_active || ""; // Populate `last_active`
+          }
+        })
+        .catch((error) => {
+          alert(`Error: ${error.message}`);
+        });
+    });
+
+    document.getElementById("loadDevice").addEventListener("click", function () {
+      const macAddress = document.getElementById("macAddress").value.trim();
+
+      if (!macAddress) {
+        alert("Please enter a MAC Address.");
+        return;
+      }
+
+      fetch(`/devices?mac_address=${encodeURIComponent(macAddress)}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Device not found.");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          document.getElementById("deviceName").value = data.device_name || "";
+          document.getElementById("location").value = data.location || "";
+          document.getElementById("lastActive").value = data.last_active || "";
+          document.getElementById("form-fields").style.display = "block";
+        })
+        .catch((error) => {
+          alert(`${error.message} You can create a new device.`);
+          document.getElementById("deviceName").value = "";
+          document.getElementById("location").value = "";
+          document.getElementById("lastActive").value = "";
+          document.getElementById("form-fields").style.display = "block";
+        });
+    });
+    
+    document.getElementById("saveDevice").addEventListener("click", function () {
+      const macAddress = document.getElementById("macAddress").value.trim();
+      const deviceName = document.getElementById("deviceName").value.trim();
+      const location = document.getElementById("location").value.trim();
+      const lastActive = document.getElementById("lastActive").value.trim();
+
+      if (!macAddress || !deviceName) {
+        alert("MAC Address or Device Name are required.");
+        return;
+      }
+
+      const payload = {
+        mac_address: macAddress,
+        device_name: deviceName,
+        location: location
+      };
+
+      fetch(`/devices`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to save device.");
+          }
+          return response.json();
+        })
+        .then(() => {
+          alert("Device saved successfully!");
+          document.getElementById("form-fields").style.display = "none";
+          document.getElementById("device-form").reset();
+        })
+        .catch((error) => {
+          alert(`Error: ${error.message}`);
+        });
+    });
+  </script>
+</body>
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Form</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    input {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    button {
+        padding: 10px 15px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+  <form id="device-form">
+    <label for="identifier">ID or MAC Address:</label>
+    <input type="text" id="identifier" name="identifier" placeholder="Enter ID or MAC Address" required />
+    <button type="button" id="loadDevice">Load Device</button>
+
+    <div id="form-fields" style="display:none;">
+      <label for="deviceName">Device Name:</label>
+      <input type="text" id="deviceName" name="deviceName" />
+
+      <label for="location">Location:</label>
+      <input type="text" id="location" name="location" />
+
+      <label for="lastActive">Last Active:</label>
+      <input type="text" id="lastActive" name="lastActive" />
+
+      <button type="button" id="saveDevice">Save Device</button>
+    </div>
+  </form>
+
+  <script>
+    document.getElementById("loadDevice").addEventListener("click", function () {
+      const identifier = document.getElementById("identifier").value.trim();
+
+      if (!identifier) {
+        alert("Please enter an ID or MAC Address.");
+        return;
+      }
+
+      fetch(`/devices?identifier=${encodeURIComponent(identifier)}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Device not found.");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          document.getElementById("deviceName").value = data.device_name || "";
+          document.getElementById("location").value = data.location || "";
+          document.getElementById("lastActive").value = data.last_active || "";
+          document.getElementById("form-fields").style.display = "block";
+        })
+        .catch((error) => {
+          alert(`${error.message} You can create a new device.`);
+          document.getElementById("deviceName").value = "";
+          document.getElementById("location").value = "";
+          document.getElementById("lastActive").value = "";
+          document.getElementById("form-fields").style.display = "block";
+        });
+    });
+
+    document.getElementById("saveDevice").addEventListener("click", function () {
+      const identifier = document.getElementById("identifier").value.trim();
+      const deviceName = document.getElementById("deviceName").value.trim();
+      const location = document.getElementById("location").value.trim();
+      const lastActive = document.getElementById("lastActive").value.trim();
+
+      if (!identifier || !deviceName) {
+        alert("Identifier and Device Name are required.");
+        return;
+      }
+
+      const payload = {
+        identifier,
+        device_name: deviceName,
+        location,
+        last_active: lastActive,
+      };
+
+      fetch(`/devices`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to save device.");
+          }
+          return response.json();
+        })
+        .then(() => {
+          alert("Device saved successfully!");
+          document.getElementById("form-fields").style.display = "none";
+          document.getElementById("device-form").reset();
+        })
+        .catch((error) => {
+          alert(`Error: ${error.message}`);
+        });
+    });
+  </script>
+</body>
+</html>
+
+<!--#############################################################################-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Device Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Edit Device Data</h1>
+        <form id="device-form">
+          <label for="identifier">ID or MAC Address:</label>
+          <input type="text" id="identifier" name="identifier" placeholder="Enter ID or MAC Address" required />
+          <button type="button" id="loadDevice">Load Device</button>
+        
+          <div id="form-fields" style="display:none;">
+            <label for="deviceName">Device Name:</label>
+            <input type="text" id="deviceName" name="deviceName" />
+        
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" />
+        
+            <label for="lastActive">Last Active:</label>
+            <input type="text" id="lastActive" name="lastActive" />
+        
+            <button type="button" id="saveDevice">Save Device</button>
+          </div>
+        </form>
+        
+    </div>
+
+    <script>
+        const apiUrl = '/devices';
+
+        function getDevice(id) {
+            fetch(`${apiUrl}?id=${id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch device data.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        data = data[0];
+                    }
+                    document.getElementById('id').value = data.id;
+                    document.getElementById('mac_address').value = data.mac_address;
+                    document.getElementById('device_name').value = data.device_name;
+                    document.getElementById('location').value = data.location;
+                    document.getElementById('last_active').value = new Date(data.last_active).toISOString().slice(0, 16);
+                })
+                .catch(error => alert(error.message));
+        }
+
+        function saveDeviceData() {
+            const form = document.getElementById('device-form');
+            const id = form.id.value;
+            const mac_address = form.mac_address.value;
+            const device_name = form.device_name.value;
+            const location = form.location.value;
+            const last_active = form.last_active.value;
+
+            const method = id ? 'PUT' : 'POST';
+            const queryParams = id ? `?mac_address=${mac_address}&device_name=${device_name}&location=${location}` : '';
+
+            fetch(apiUrl + queryParams, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id, mac_address, device_name, location, last_active }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to save device data.');
+                    }
+                    return response.json();
+                })
+                .then(data => alert(data.message))
+                .catch(error => alert(error.message));
+        }
+
+        // Initialize form with data for a given device ID
+        // Replace 1 with the desired device ID to load
+        getDevice(1);
+    </script>
+</body>
+</html>
+
+<!--#############################################################################-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Device Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .form-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        .form-container h1 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555555;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+        }
+        .button-group button {
+            padding: 10px 15px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .button-group .save {
+            background-color: #28a745;
+            color: white;
+        }
+        .button-group .cancel {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Edit Device Data</h1>
+        <form id="edit-form">
+            <div class="form-group">
+                <label for="id">ID</label>
+                <input type="number" id="id" name="id" value="1" readonly>
+            </div>
+            <div class="form-group">
+                <label for="mac_address">MAC Address</label>
+                <input type="text" id="mac_address" name="mac_address" value="00:1A:7D:DA:71:13">
+            </div>
+            <div class="form-group">
+                <label for="device_name">Device Name</label>
+                <input type="text" id="device_name" name="device_name" value="ESP32">
+            </div>
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" value="Office">
+            </div>
+            <div class="form-group">
+                <label for="last_active">Last Active</label>
+                <input type="datetime-local" id="last_active" name="last_active" value="2024-11-25T23:33:24">
+            </div>
+            <div class="button-group">
+                <button type="button" class="save" onclick="saveData()">Save</button>
+                <button type="reset" class="cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function saveData() {
+            const formData = new FormData(document.getElementById('edit-form'));
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+            console.log('Saved Data:', data);
+            alert('Data saved successfully!\n' + JSON.stringify(data, null, 2));
+        }
+    </script>
+</body>
+</html>
+
+
+<!--#############################################################################-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Stranica indeksna</h1>
+    <img src="./js.png" width=100 height=100 alt="">
+    <img src="./jssdfsdfds.png" width=100 height=100 alt="">
+</body>
+</html>
+
+<!--#############################################################################-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Device Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #0078d7;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .device-form {
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .device-form input {
+            margin: 5px 0;
+            padding: 8px;
+            width: calc(100% - 20px);
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .device-form button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .device-form button:hover {
+            background-color: #005bb5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #0078d7;
+            color: white;
+        }
+
+        #chart-container {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IoT Device Dashboard</h1>
+    </header>
+    <main>
+        <div class="device-form">
+            <h3>Add/Edit Device</h3>
+            <input type="text" id="mac_address" placeholder="MAC Address" />
+            <input type="text" id="device_name" placeholder="Device Name" />
+            <input type="text" id="location" placeholder="Location" />
+            <input type="text" id="last_active" placeholder="Last Active" disabled />
+            <button onclick="addOrUpdateDevice()">Submit</button>
+        </div>
+
+        <h3>Device List</h3>
+        <table id="device-table">
+            <thead>
+                <tr>
+                    <th>MAC Address</th>
+                    <th>Device Name</th>
+                    <th>Location</th>
+                    <th>Last Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be dynamically populated here -->
+            </tbody>
+        </table>
+
+        <div id="chart-container">
+            <canvas id="sensor-chart" width="400" height="200"></canvas>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const devices = [];
+
+        function addOrUpdateDevice() {
+            const macAddress = document.getElementById('mac_address').value;
+            const deviceName = document.getElementById('device_name').value;
+            const location = document.getElementById('location').value;
+            const lastActive = new Date().toISOString();
+
+            const existingDeviceIndex = devices.findIndex(device => device.mac_address === macAddress);
+            if (existingDeviceIndex !== -1) {
+                devices[existingDeviceIndex] = { mac_address: macAddress, device_name: deviceName, location, last_active: lastActive };
+            } else {
+                devices.push({ mac_address: macAddress, device_name: deviceName, location, last_active: lastActive });
+            }
+
+            updateTable();
+            clearForm();
+        }
+
+        function updateTable() {
+            const tableBody = document.querySelector('#device-table tbody');
+            tableBody.innerHTML = '';
+            devices.forEach(device => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${device.mac_address}</td>
+                    <td>${device.device_name}</td>
+                    <td>${device.location}</td>
+                    <td>${device.last_active}</td>
+                    <td><button onclick="editDevice('${device.mac_address}')">Edit</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function editDevice(macAddress) {
+            const device = devices.find(device => device.mac_address === macAddress);
+            if (device) {
+                document.getElementById('mac_address').value = device.mac_address;
+                document.getElementById('device_name').value = device.device_name;
+                document.getElementById('location').value = device.location;
+                document.getElementById('last_active').value = device.last_active;
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('mac_address').value = '';
+            document.getElementById('device_name').value = '';
+            document.getElementById('location').value = '';
+            document.getElementById('last_active').value = '';
+        }
+
+        const ctx = document.getElementById('sensor-chart').getContext('2d');
+        const sensorChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May'],
+                datasets: [{
+                    label: 'Sensor Data',
+                    data: [10, 20, 15, 25, 30],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+            }
+        });
+    </script>
+</body>
+</html>
+
+<!--#############################################################################-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Device Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #0078d7;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        main {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .device-form {
+            width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .device-form input {
+            margin: 5px 0;
+            padding: 8px;
+            width: calc(100% - 20px);
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .device-form button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .device-form button:hover {
+            background-color: #005bb5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #0078d7;
+            color: white;
+        }
+
+        .chart-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        canvas {
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IoT Device Dashboard</h1>
+    </header>
+    <main>
+        <div class="device-form">
+            <h3>Add/Edit Device</h3>
+            <input type="text" id="mac_address" placeholder="MAC Address" />
+            <input type="text" id="device_name" placeholder="Device Name" />
+            <input type="text" id="location" placeholder="Location" />
+            <input type="text" id="last_active" placeholder="Last Active" disabled />
+            <button onclick="addOrUpdateDevice()">Submit</button>
+        </div>
+
+        <h3>Device List</h3>
+        <table id="device-table">
+            <thead>
+                <tr>
+                    <th>MAC Address</th>
+                    <th>Device Name</th>
+                    <th>Location</th>
+                    <th>Last Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be dynamically populated here -->
+            </tbody>
+        </table>
+
+        <div class="chart-container">
+            <canvas id="temperature-chart" width="300" height="200"></canvas>
+            <canvas id="humidity-chart" width="300" height="200"></canvas>
+            <canvas id="pm-chart" width="300" height="200"></canvas>
+            <canvas id="co2-chart" width="300" height="200"></canvas>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const devices = [];
+
+        function addOrUpdateDevice() {
+            const macAddress = document.getElementById('mac_address').value;
+            const deviceName = document.getElementById('device_name').value;
+            const location = document.getElementById('location').value;
+            const lastActive = new Date().toISOString();
+
+            const existingDeviceIndex = devices.findIndex(device => device.mac_address === macAddress);
+            if (existingDeviceIndex !== -1) {
+                devices[existingDeviceIndex] = { mac_address: macAddress, device_name: deviceName, location, last_active: lastActive };
+            } else {
+                devices.push({ mac_address: macAddress, device_name: deviceName, location, last_active: lastActive });
+            }
+
+            updateTable();
+            clearForm();
+        }
+
+        function updateTable() {
+            const tableBody = document.querySelector('#device-table tbody');
+            tableBody.innerHTML = '';
+            devices.forEach(device => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${device.mac_address}</td>
+                    <td>${device.device_name}</td>
+                    <td>${device.location}</td>
+                    <td>${device.last_active}</td>
+                    <td><button onclick="editDevice('${device.mac_address}')">Edit</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function editDevice(macAddress) {
+            const device = devices.find(device => device.mac_address === macAddress);
+            if (device) {
+                document.getElementById('mac_address').value = device.mac_address;
+                document.getElementById('device_name').value = device.device_name;
+                document.getElementById('location').value = device.location;
+                document.getElementById('last_active').value = device.last_active;
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('mac_address').value = '';
+            document.getElementById('device_name').value = '';
+            document.getElementById('location').value = '';
+            document.getElementById('last_active').value = '';
+        }
+
+        const chartData = {
+            temperature: [23.15, 24.1, 22.9, 23.6, 23.0],
+            humidity: [38.75, 39.0, 40.1, 37.5, 38.2],
+            pm: [19, 20.1, 20.3, 20.4, 20.5],
+            co2: [1119, 1125, 1110, 1130, 1120],
+        };
+
+        const createChart = (ctx, label, data) => {
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Timestamp 1', 'Timestamp 2', 'Timestamp 3', 'Timestamp 4', 'Timestamp 5'],
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                }
+            });
+        };
+
+        createChart(document.getElementById('temperature-chart').getContext('2d'), 'Temperature', chartData.temperature);
+        createChart(document.getElementById('humidity-chart').getContext('2d'), 'Humidity', chartData.humidity);
+        createChart(document.getElementById('pm-chart').getContext('2d'), 'Particulate Matter', chartData.pm);
+        createChart(document.getElementById('co2-chart').getContext('2d'), 'CO2 Levels', chartData.co2);
+    </script>
+</body>
+</html>
+
+<!--#############################################################################-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Sensor Dashboard</title>
+    <style>
+      @import url(https://fonts.googleapis.com/css2?family=Lato&display=swap);
+      
+      @import url(https://fonts.googleapis.com/css2?family=Open+Sans&display=swap);
+      
+      /*! tailwindcss v3.4.11 | MIT License | https://tailwindcss.com*/
+      *,
+      :after,
+      :before {
+        border: 0 solid #e5e7eb;
+        box-sizing: border-box;
+      }
+      :after,
+      :before {
+        --tw-content: "";
+      }
+      :host,
+      html {
+        line-height: 1.5;
+        -webkit-text-size-adjust: 100%;
+        font-family:
+          Open Sans,
+          ui-sans-serif,
+          system-ui,
+          sans-serif,
+          Apple Color Emoji,
+          Segoe UI Emoji,
+          Segoe UI Symbol,
+          Noto Color Emoji;
+        font-feature-settings: normal;
+        font-variation-settings: normal;
+        -moz-tab-size: 4;
+        tab-size: 4;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        line-height: inherit;
+        margin: 0;
+      }
+      hr {
+        border-top-width: 1px;
+        color: inherit;
+        height: 0;
+      }
+      abbr:where([title]) {
+        text-decoration: underline dotted;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-size: inherit;
+        font-weight: inherit;
+      }
+      a {
+        color: inherit;
+        text-decoration: inherit;
+      }
+      b,
+      strong {
+        font-weight: bolder;
+      }
+      code,
+      kbd,
+      pre,
+      samp {
+        font-family:
+          ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Monaco,
+          Consolas,
+          Liberation Mono,
+          Courier New,
+          monospace;
+        font-feature-settings: normal;
+        font-size: 1em;
+        font-variation-settings: normal;
+      }
+      small {
+        font-size: 80%;
+      }
+      sub,
+      sup {
+        font-size: 75%;
+        line-height: 0;
+        position: relative;
+        vertical-align: baseline;
+      }
+      sub {
+        bottom: -0.25em;
+      }
+      sup {
+        top: -0.5em;
+      }
+      table {
+        border-collapse: collapse;
+        border-color: inherit;
+        text-indent: 0;
+      }
+      button,
+      input,
+      optgroup,
+      select,
+      textarea {
+        color: inherit;
+        font-family: inherit;
+        font-feature-settings: inherit;
+        font-size: 100%;
+        font-variation-settings: inherit;
+        font-weight: inherit;
+        letter-spacing: inherit;
+        line-height: inherit;
+        margin: 0;
+        padding: 0;
+      }
+      button,
+      select {
+        text-transform: none;
+      }
+      button,
+      input:where([type="button"]),
+      input:where([type="reset"]),
+      input:where([type="submit"]) {
+        -webkit-appearance: button;
+        background-color: transparent;
+        background-image: none;
+      }
+      :-moz-focusring {
+        outline: auto;
+      }
+      :-moz-ui-invalid {
+        box-shadow: none;
+      }
+      progress {
+        vertical-align: baseline;
+      }
+      ::-webkit-inner-spin-button,
+      ::-webkit-outer-spin-button {
+        height: auto;
+      }
+      [type="search"] {
+        -webkit-appearance: textfield;
+        outline-offset: -2px;
+      }
+      ::-webkit-search-decoration {
+        -webkit-appearance: none;
+      }
+      ::-webkit-file-upload-button {
+        -webkit-appearance: button;
+        font: inherit;
+      }
+      summary {
+        display: list-item;
+      }
+      blockquote,
+      dd,
+      dl,
+      figure,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      hr,
+      p,
+      pre {
+        margin: 0;
+      }
+      fieldset {
+        margin: 0;
+      }
+      fieldset,
+      legend {
+        padding: 0;
+      }
+      menu,
+      ol,
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      dialog {
+        padding: 0;
+      }
+      textarea {
+        resize: vertical;
+      }
+      input::placeholder,
+      textarea::placeholder {
+        color: #9ca3af;
+        opacity: 1;
+      }
+      [role="button"],
+      button {
+        cursor: pointer;
+      }
+      :disabled {
+        cursor: default;
+      }
+      audio,
+      canvas,
+      embed,
+      iframe,
+      img,
+      object,
+      svg,
+      video {
+        display: block;
+        vertical-align: middle;
+      }
+      img,
+      video {
+        height: auto;
+        max-width: 100%;
+      }
+      [hidden] {
+        display: none;
+      }
+      *,
+      :after,
+      :before {
+        --tw-border-spacing-x: 0;
+        --tw-border-spacing-y: 0;
+        --tw-translate-x: 0;
+        --tw-translate-y: 0;
+        --tw-rotate: 0;
+        --tw-skew-x: 0;
+        --tw-skew-y: 0;
+        --tw-scale-x: 1;
+        --tw-scale-y: 1;
+        --tw-pan-x: ;
+        --tw-pan-y: ;
+        --tw-pinch-zoom: ;
+        --tw-scroll-snap-strictness: proximity;
+        --tw-gradient-from-position: ;
+        --tw-gradient-via-position: ;
+        --tw-gradient-to-position: ;
+        --tw-ordinal: ;
+        --tw-slashed-zero: ;
+        --tw-numeric-figure: ;
+        --tw-numeric-spacing: ;
+        --tw-numeric-fraction: ;
+        --tw-ring-inset: ;
+        --tw-ring-offset-width: 0px;
+        --tw-ring-offset-color: #fff;
+        --tw-ring-color: rgba(59, 130, 246, 0.5);
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 0 #0000;
+        --tw-blur: ;
+        --tw-brightness: ;
+        --tw-contrast: ;
+        --tw-grayscale: ;
+        --tw-hue-rotate: ;
+        --tw-invert: ;
+        --tw-saturate: ;
+        --tw-sepia: ;
+        --tw-drop-shadow: ;
+        --tw-backdrop-blur: ;
+        --tw-backdrop-brightness: ;
+        --tw-backdrop-contrast: ;
+        --tw-backdrop-grayscale: ;
+        --tw-backdrop-hue-rotate: ;
+        --tw-backdrop-invert: ;
+        --tw-backdrop-opacity: ;
+        --tw-backdrop-saturate: ;
+        --tw-backdrop-sepia: ;
+        --tw-contain-size: ;
+        --tw-contain-layout: ;
+        --tw-contain-paint: ;
+        --tw-contain-style: ;
+      }
+      ::backdrop {
+        --tw-border-spacing-x: 0;
+        --tw-border-spacing-y: 0;
+        --tw-translate-x: 0;
+        --tw-translate-y: 0;
+        --tw-rotate: 0;
+        --tw-skew-x: 0;
+        --tw-skew-y: 0;
+        --tw-scale-x: 1;
+        --tw-scale-y: 1;
+        --tw-pan-x: ;
+        --tw-pan-y: ;
+        --tw-pinch-zoom: ;
+        --tw-scroll-snap-strictness: proximity;
+        --tw-gradient-from-position: ;
+        --tw-gradient-via-position: ;
+        --tw-gradient-to-position: ;
+        --tw-ordinal: ;
+        --tw-slashed-zero: ;
+        --tw-numeric-figure: ;
+        --tw-numeric-spacing: ;
+        --tw-numeric-fraction: ;
+        --tw-ring-inset: ;
+        --tw-ring-offset-width: 0px;
+        --tw-ring-offset-color: #fff;
+        --tw-ring-color: rgba(59, 130, 246, 0.5);
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 0 #0000;
+        --tw-blur: ;
+        --tw-brightness: ;
+        --tw-contrast: ;
+        --tw-grayscale: ;
+        --tw-hue-rotate: ;
+        --tw-invert: ;
+        --tw-saturate: ;
+        --tw-sepia: ;
+        --tw-drop-shadow: ;
+        --tw-backdrop-blur: ;
+        --tw-backdrop-brightness: ;
+        --tw-backdrop-contrast: ;
+        --tw-backdrop-grayscale: ;
+        --tw-backdrop-hue-rotate: ;
+        --tw-backdrop-invert: ;
+        --tw-backdrop-opacity: ;
+        --tw-backdrop-saturate: ;
+        --tw-backdrop-sepia: ;
+        --tw-contain-size: ;
+        --tw-contain-layout: ;
+        --tw-contain-paint: ;
+        --tw-contain-style: ;
+      }
+      #webcrumbs .relative {
+        position: relative;
+      }
+      #webcrumbs .mb-2 {
+        margin-bottom: 8px;
+      }
+      #webcrumbs .mt-6 {
+        margin-top: 24px;
+      }
+      #webcrumbs .flex {
+        display: flex;
+      }
+      #webcrumbs .grid {
+        display: grid;
+      }
+      #webcrumbs .min-h-\[700px\] {
+        min-height: 700px;
+      }
+      #webcrumbs .w-\[1200px\] {
+        width: 1200px;
+      }
+      #webcrumbs .w-full {
+        width: 100%;
+      }
+      #webcrumbs .grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      #webcrumbs .grid-cols-\[1fr\2c 2fr\] {
+        grid-template-columns: 1fr 2fr;
+      }
+      #webcrumbs .flex-row {
+        flex-direction: row;
+      }
+      #webcrumbs .flex-col {
+        flex-direction: column;
+      }
+      #webcrumbs .items-center {
+        align-items: center;
+      }
+      #webcrumbs .justify-between {
+        justify-content: space-between;
+      }
+      #webcrumbs .gap-3 {
+        gap: 12px;
+      }
+      #webcrumbs .gap-4 {
+        gap: 16px;
+      }
+      #webcrumbs .gap-5 {
+        gap: 20px;
+      }
+      #webcrumbs .gap-6 {
+        gap: 24px;
+      }
+      #webcrumbs .gap-8 {
+        gap: 32px;
+      }
+      #webcrumbs .rounded-lg {
+        border-radius: 24px;
+      }
+      #webcrumbs .rounded-md {
+        border-radius: 18px;
+      }
+      #webcrumbs .border {
+        border-width: 1px;
+      }
+      #webcrumbs .border-b {
+        border-bottom-width: 1px;
+      }
+      #webcrumbs .border-neutral-300 {
+        --tw-border-opacity: 1;
+        border-color: rgb(202 202 202 / var(--tw-border-opacity));
+      }
+      #webcrumbs .bg-neutral-100 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(238 238 238 / var(--tw-bg-opacity));
+      }
+      #webcrumbs .bg-neutral-300 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(202 202 202 / var(--tw-bg-opacity));
+      }
+      #webcrumbs .bg-neutral-50 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(247 247 247 / var(--tw-bg-opacity));
+      }
+      #webcrumbs .bg-primary-500 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(115 65 255 / var(--tw-bg-opacity));
+      }
+      #webcrumbs .bg-red-500 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(239 68 68 / var(--tw-bg-opacity));
+      }
+      #webcrumbs .bg-white {
+        --tw-bg-opacity: 1;
+        background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+      }
+      #webcrumbs .p-3 {
+        padding: 12px;
+      }
+      #webcrumbs .p-4 {
+        padding: 16px;
+      }
+      #webcrumbs .p-6 {
+        padding: 24px;
+      }
+      #webcrumbs .px-4 {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      #webcrumbs .py-2 {
+        padding-bottom: 8px;
+        padding-top: 8px;
+      }
+      #webcrumbs .text-left {
+        text-align: left;
+      }
+      #webcrumbs .text-center {
+        text-align: center;
+      }
+      #webcrumbs .font-title {
+        font-family:
+          Lato,
+          ui-sans-serif,
+          system-ui,
+          sans-serif,
+          Apple Color Emoji,
+          Segoe UI Emoji,
+          Segoe UI Symbol,
+          Noto Color Emoji;
+      }
+      #webcrumbs .text-2xl {
+        font-size: 24px;
+        line-height: 31.200000000000003px;
+      }
+      #webcrumbs .text-base {
+        font-size: 16px;
+        line-height: 25.6px;
+      }
+      #webcrumbs .text-sm {
+        font-size: 14px;
+        line-height: 21px;
+      }
+      #webcrumbs .text-xl {
+        font-size: 20px;
+        line-height: 28px;
+      }
+      #webcrumbs .text-neutral-500 {
+        --tw-text-opacity: 1;
+        color: rgb(153 153 153 / var(--tw-text-opacity));
+      }
+      #webcrumbs .text-neutral-950 {
+        --tw-text-opacity: 1;
+        color: rgb(40 40 40 / var(--tw-text-opacity));
+      }
+      #webcrumbs .text-primary-50 {
+        --tw-text-opacity: 1;
+        color: rgb(243 241 255 / var(--tw-text-opacity));
+      }
+      #webcrumbs .text-primary-500 {
+        --tw-text-opacity: 1;
+        color: rgb(115 65 255 / var(--tw-text-opacity));
+      }
+      #webcrumbs .text-white {
+        --tw-text-opacity: 1;
+        color: rgb(255 255 255 / var(--tw-text-opacity));
+      }
+      #webcrumbs .shadow-lg {
+        --tw-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color),
+          0 4px 6px -4px var(--tw-shadow-color);
+        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+          var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+      }
+      #webcrumbs {
+        font-family: Open Sans !important;
+        font-size: 16px !important;
+      }
+      #webcrumbs :is(.bg-neutral-50) {
+        color: rgba(0, 0, 0, 0.9) !important;
+      }
+      #webcrumbs :is(.bg-neutral-100) {
+        color: rgba(0, 0, 0, 0.9) !important;
+      }
+      #webcrumbs :is(.bg-neutral-300) {
+        color: rgba(0, 0, 0, 0.9) !important;
+      }
+      #webcrumbs :is(.bg-primary-500) {
+        color: hsla(0, 0%, 100%, 0.9) !important;
+      }
+      
+      body {
+        line-height: inherit;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        min-width: 100vw;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #ffffff, #d4d4d4);
+      }
+    </style>
+  </head>
+  <body>
+  <div id="webcrumbs">
+    <div class="relative w-[1200px] bg-white shadow-lg rounded-lg p-6 flex flex-col gap-8 min-h-[700px]"> <header class="flex justify-between items-center"> <h1 class="text-2xl font-title text-neutral-950">IoT Sensor Dashboard</h1> <button class="bg-primary-500 text-primary-50 px-4 py-2 rounded-md text-sm">Add Sensor</button> </header> <section class="grid grid-cols-[1fr,2fr] gap-6"> <section class="bg-neutral-100 p-4 rounded-md flex flex-col gap-6"> <h2 class="text-xl text-neutral-950">Manage Sensor</h2> <form class="flex flex-col gap-5"> <input type="text" placeholder="Enter MAC Address" class="p-3 border border-neutral-300 rounded-md text-sm"/> <input type="text" placeholder="Enter Device Name" class="p-3 border border-neutral-300 rounded-md text-sm"/> <input type="text" placeholder="Enter Location" class="p-3 border border-neutral-300 rounded-md text-sm"/> <div class="flex justify-between gap-3"> <button class="bg-primary-500 text-primary-50 py-2 px-4 rounded-md text-sm">Add Sensor</button> <button class="bg-neutral-300 text-neutral-950 py-2 px-4 rounded-md text-sm">Rename</button> <button class="bg-red-500 text-white py-2 px-4 rounded-md text-sm">Remove</button> </div> </form> </section> <section class="bg-neutral-100 p-4 rounded-md flex flex-col gap-6"> <h2 class="text-xl text-neutral-950">Motion Detected</h2> <table class="w-full text-sm text-left text-neutral-950"> <thead class="text-neutral-500"> <tr> <th class="py-2 px-4">Name</th> <th class="py-2 px-4">MAC Address</th> <th class="py-2 px-4">Location</th> <th class="py-2 px-4">Last Active</th> </tr> </thead> <tbody> <tr class="border-b"> <td class="py-2 px-4">Sensor #1</td> <td class="py-2 px-4">00:1B:44:11:3A:B7</td> <td class="py-2 px-4">Office</td> <td class="py-2 px-4 text-primary-500">10:30 AM</td> </tr> <tr class="border-b"> <td class="py-2 px-4">Sensor #2</td> <td class="py-2 px-4">00:1B:44:21:4B:D9</td> <td class="py-2 px-4">Lobby</td> <td class="py-2 px-4 text-neutral-500">8:15 AM</td> </tr> <tr> <td class="py-2 px-4">Sensor #3</td> <td class="py-2 px-4">00:1B:44:31:5C:FA</td> <td class="py-2 px-4">Warehouse</td> <td class="py-2 px-4 text-primary-500">10:40 AM</td> </tr> </tbody> </table> </section> </section> <section class="bg-neutral-100 p-6 rounded-md grid grid-cols-3 gap-4"> <div class="bg-neutral-50 p-4 rounded-md"> <h2 class="text-sm text-neutral-950 mb-2"> Temperature </h2> <div data-chart="chart_0"></div> </div><div class="bg-neutral-50 p-4 rounded-md"> <h2 class="text-sm text-neutral-950 mb-2"> Humidity </h2> <div data-chart="chart_0"></div> </div><div class="bg-neutral-50 p-4 rounded-md"> <h2 class="text-sm text-neutral-950 mb-2"> CO2 </h2> <div data-chart="chart_0"></div> </div><div class="bg-neutral-50 p-4 rounded-md"> <h2 class="text-sm text-neutral-950 mb-2"> Pressure </h2> <div data-chart="chart_0"></div> </div><div class="bg-neutral-50 p-4 rounded-md"> <h2 class="text-sm text-neutral-950 mb-2"> VOC Index </h2> <div data-chart="chart_0"></div> </div><div class="bg-neutral-50 p-4 rounded-md"> <h2 class="text-sm text-neutral-950 mb-2"> PM1 </h2> <div data-chart="chart_0"></div> </div><div class="bg-neutral-50 p-4 rounded-md"> <h2 class="text-sm text-neutral-950 mb-2"> PM2.5 </h2> <div data-chart="chart_0"></div> </div><div class="bg-neutral-50 p-4 rounded-md"> <h2 class="text-sm text-neutral-950 mb-2"> PM4 </h2> <div data-chart="chart_0"></div> </div><div class="bg-neutral-50 p-4 rounded-md"> <h2 class="text-sm text-neutral-950 mb-2"> PM10 </h2> <div data-chart="chart_0"></div> </div> </section> <section class="grid grid-cols-3 gap-6"> <div class="bg-neutral-100 p-4 rounded-md flex flex-col gap-4"> <h2 class="text-base text-neutral-950">Temperature</h2> <div data-chart="chart_1"></div> </div> <div class="bg-neutral-100 p-4 rounded-md flex flex-col gap-4"> <h2 class="text-base text-neutral-950">Humidity</h2> <div data-chart="chart_2"></div> </div> <div class="bg-neutral-100 p-4 rounded-md flex flex-col gap-4"> <h2 class="text-base text-neutral-950">Air Quality</h2> <div data-chart="chart_3"></div> </div> </section> <section class="bg-neutral-100 p-4 rounded-md flex flex-col gap-4"> <h2 class="text-base text-neutral-950">Energy Consumption</h2> <div data-chart="chart_4"></div> </section> <footer class="text-sm text-neutral-500 mt-6 text-center"> All data updates every hour. Last sync: 10:45 AM </footer> </div>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>new ApexCharts(document.querySelector('[data-chart="chart_0"]'),{"chart":{"type":"line","width":"100%","height":"80","toolbar":{"show":false}},"dataLabels":{"enabled":false},"stroke":{"curve":"smooth"},"colors":["#7341ff"],"xaxis":{"categories":["Jan","Feb","Mar","Apr","May","Jun"]},"series":[{"name":"Value","data":[83,83,83,83,83,83]}]}).render();new ApexCharts(document.querySelector('[data-chart="chart_1"]'),{"chart":{"type":"line","width":"100%","height":"120","toolbar":{"show":false}},"dataLabels":{"enabled":false},"stroke":{"curve":"smooth"},"colors":["#7341ff"],"xaxis":{"categories":["Jan","Feb","Mar","Apr","May","Jun"]},"series":[{"name":"Temperature","data":[22,23,24,22,25,24]}]}).render();new ApexCharts(document.querySelector('[data-chart="chart_2"]'),{"chart":{"type":"line","width":"100%","height":"120","toolbar":{"show":false}},"dataLabels":{"enabled":false},"stroke":{"curve":"smooth"},"colors":["#7341ff"],"xaxis":{"categories":["Jan","Feb","Mar","Apr","May","Jun"]},"series":[{"name":"Humidity","data":[45,50,55,60,50,55]}]}).render();new ApexCharts(document.querySelector('[data-chart="chart_3"]'),{"chart":{"type":"line","width":"100%","height":"120","toolbar":{"show":false}},"dataLabels":{"enabled":false},"stroke":{"curve":"smooth"},"colors":["#7341ff"],"xaxis":{"categories":["Jan","Feb","Mar","Apr","May","Jun"]},"series":[{"name":"Air Quality","data":[70,75,80,85,80,75]}]}).render();new ApexCharts(document.querySelector('[data-chart="chart_4"]'),{"chart":{"type":"line","width":"100%","height":"120","toolbar":{"show":false}},"dataLabels":{"enabled":false},"stroke":{"curve":"smooth"},"colors":["#7341ff"],"xaxis":{"categories":["Jan","Feb","Mar","Apr","May","Jun"]},"series":[{"name":"Energy","data":[10,15,20,25,30,25]}]}).render();</script>
+  </div>
+  </body>
+</html>

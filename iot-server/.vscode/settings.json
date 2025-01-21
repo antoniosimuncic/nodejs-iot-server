@@ -1,0 +1,10 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "sensor_data",
+            "database": "${workspaceFolder:iot-server}/sensor_data.db"
+        }
+    ]
+}
