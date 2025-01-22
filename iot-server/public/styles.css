@@ -62,29 +62,21 @@ header h1 {
   /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
 }
 
-.motion-detected {
-  flex: 2;
-  max-width: 66%;
-  background: var(--window-color);
-  border-radius: 15px;
-  padding: 20px;
-  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
-}
-
-.manage-sensor h2, .motion-detected h2 {
+.manage-sensor h2 {
   margin-top: 0;
 }
 
 .manage-sensor input {
   display: block;
   width: 96%;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   padding: 10px;
   border: 0px solid var(--background-color);
   border-radius: 5px;
   background-color: var(--third-color);
   color: white;
 }
+
 
 
 /***** Buttons *****/
@@ -117,44 +109,76 @@ header h1 {
 }
 
 
+
 /***** Device List table *****/
 
-.motion-detected table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  border-radius: 15px 10px 0 0;
-  overflow: hidden;
-  min-width: 300px;
+.device-list {
+  flex: 2;
+  max-width: 66%;
+  background: var(--window-color);
+  border-radius: 15px 0 0 0;
+  padding: 20px;
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
 }
 
-.motion-detected th {
+.device-list h2 {
+  margin-top: 0;
+}
+
+.scrollable-table {
+  height: 200px;
+  overflow-y: auto;
+  border-radius: 15px;
+}
+
+.scrollable-table > .table {
+  width: 100%;
+}
+
+.device-list table {
+  width: 100%;
+  border-collapse: collapse;
+  /* margin-top: 20px; */
+}
+
+.device-list thead th {
   background-color: var(--primary-color);
   color: white;
   text-align: left;
   font-weight: bold;
+  position: sticky;  /* floating thead */
+  top: 0px;
+  z-index: 1;
 }
 
-.motion-detected th, .motion-detected td {
+.device-list th, .device-list td {
   padding: 10px 15px;
+  text-align: left;
 }
 
-.motion-detected tbody tr {
+.device-list tbody tr {
   border-bottom: 1px solid #ddd;
 }
 
-.motion-detected tbody tr:nth-of-type(even) {
+
+.device-list tbody tr:nth-of-type(even) {
   background-color: #3e3e42;
 }
 
-.motion-detected tbody tr:last-of-type {
+.device-list tbody tr:last-of-type {
   border-bottom: 2px solid var(--primary-color);
 }
 
-.motion-detected tbody tr.active-row {
+.device-list tbody tr.active-row {
   font-weight: bold;
   color: var(--secondary-color);
 }
+
+.device-list tbody tr:hover {
+  background-color: var(--hover-color);
+  cursor: pointer;
+}
+
 
 /***** Charts *****/
 
@@ -184,12 +208,16 @@ header h1 {
       flex-direction: column;
   }
 
-  .manage-sensor, .motion-detected {
+  .manage-sensor, .device-list {
       max-width: 100%;
       
   }
-  .motion-detected table {
-    font-size: 0.7em;
+  .device-list table {
+    font-size: 0.5em;
+    max-width: 310px;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 
   .charts {
