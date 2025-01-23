@@ -6,7 +6,7 @@
   --text-color: #FFFFFF;
   --window-color: #2d2d30;
   --danger-color: #e53e3e;
-  --hover-color: #007ACC;
+  --hover-color: #007acc83;
   --table-color: #3e3e42;
 }
 
@@ -31,10 +31,6 @@ header {
 header h1 {
   margin: 0;
   margin: auto;
-}
-
-.add-sensor-button:hover {
-  background-color: var(--hover-color);
 }
 
 .dashboard-container {
@@ -108,15 +104,31 @@ header h1 {
   color: white;
 }
 
+#refresh-button {
+  position: absolute; /* Make it position relative to the parent */
+  top: 18px; /* Align at the top */
+  right: 18px; /* Align to the right */
+  background-color: var(--window-color);
+  border: none;
+  cursor: pointer;
+  z-index: 10; /* Ensure it's on top of other content */
+}
+
+#refresh-button img {
+  vertical-align: middle;
+  width: 28px;
+  height: 28px;
+}
 
 
 /***** Device List table *****/
 
 .device-list {
+  position: relative;
   flex: 2;
   max-width: 66%;
   background: var(--window-color);
-  border-radius: 15px 0 0 0;
+  border-radius: 15px;
   padding: 20px;
   /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
 }
@@ -128,7 +140,7 @@ header h1 {
 .scrollable-table {
   height: 200px;
   overflow-y: auto;
-  border-radius: 15px;
+  /* border-radius: 15px; */
 }
 
 .scrollable-table > .table {
@@ -147,7 +159,7 @@ header h1 {
   text-align: left;
   font-weight: bold;
   position: sticky;  /* floating thead */
-  top: 0px;
+  top: 0;
   z-index: 1;
 }
 
@@ -169,7 +181,7 @@ header h1 {
   border-bottom: 2px solid var(--primary-color);
 }
 
-.device-list tbody tr.active-row {
+.active-row {
   font-weight: bold;
   color: var(--secondary-color);
 }
@@ -178,6 +190,7 @@ header h1 {
   background-color: var(--hover-color);
   cursor: pointer;
 }
+
 
 
 /***** Charts *****/

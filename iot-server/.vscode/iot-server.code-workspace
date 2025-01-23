@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"sqltools.connections": [
+			{
+				"previewLimit": 50,
+				"driver": "SQLite",
+				"name": "test_veza",
+				"database": "${workspaceFolder:iot-server}/sensor_data.db"
+			}
+		]
+	}
+}

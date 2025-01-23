@@ -6,5 +6,6 @@
             "name": "sensor_data",
             "database": "${workspaceFolder:iot-server}/sensor_data.db"
         }
-    ]
+    ],
+    "sqltools.useNodeRuntime": true
 }

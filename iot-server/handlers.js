@@ -12,7 +12,21 @@ const THRESHOLDS = {
     co2: 1500,
     voc: 400,
     pressure: 1013.25
-  };
+};
+
+
+// implement this
+function checkThresholds(sensorData) {
+    const alerts = [];
+    for (const [key, value] of Object.entries(sensorData)) {
+        if (THRESHOLDS[key] && value > THRESHOLDS[key]) {
+            alerts.push(`High ${key}`);
+        }
+    }
+    return alerts;
+}
+
+
 
 // List, add, modify or delete devices
 function _Devices(req, res, q, data) {
