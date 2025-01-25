@@ -209,7 +209,7 @@ header h1 {
 }
 
 /* Restrict to a maximum of 3 charts per row */
-@media (min-width: 1200px) {
+@media (min-width: 1000px) {
   .charts {
       grid-template-columns: repeat(3, 1fr);
   }
@@ -226,8 +226,7 @@ header h1 {
       
   }
   .device-list table {
-    font-size: 0.5em;
-    max-width: 310px;
+    font-size: 0.7em;
     display: block;
     overflow-x: auto;
     white-space: nowrap;
