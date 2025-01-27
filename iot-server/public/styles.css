@@ -51,10 +51,11 @@ header h1 {
 
 .manage-sensor {
   flex: 1;
-  max-width: 30.5%;
   background: var(--window-color);
   border-radius: 15px;
   padding: 20px;
+  max-width: 30.5%;
+  min-width: 410px;
   /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
 }
 
@@ -79,7 +80,7 @@ header h1 {
 
 .buttons {
   display: flex;
-  gap: 10px;
+  gap: 15px;
 }
 
 .buttons button {
@@ -126,7 +127,7 @@ header h1 {
 .device-list {
   position: relative;
   flex: 2;
-  max-width: 66%;
+  /* max-width: 66%; */
   background: var(--window-color);
   border-radius: 15px;
   padding: 20px;
@@ -201,17 +202,25 @@ header h1 {
   gap: 20px;
 }
 
-.chart {
+.chart-container {
   background: var(--window-color);
   border-radius: 10px;
   padding: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 400px;
 }
+
+.chart-container canvas {
+  max-width: 100%; /* Ensure charts fit within their containers */
+}
+
+
+/***** Setup for mobile devices *****/
 
 /* Restrict to a maximum of 3 charts per row */
 @media (min-width: 1000px) {
   .charts {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -223,8 +232,18 @@ header h1 {
 
   .manage-sensor, .device-list {
       max-width: 100%;
-      
+      min-width: 300px;
   }
+
+  .buttons {
+    font-size: 0.7em;
+    gap: 10px;
+  }
+  
+  .buttons button {
+    padding: 10px 15px;
+  }
+
   .device-list table {
     font-size: 0.7em;
     display: block;
@@ -234,5 +253,8 @@ header h1 {
 
   .charts {
       grid-template-columns: 1fr; /* Stack charts vertically on mobile */
+  }
+  .chart-container {
+    min-height: 250px;
   }
 }

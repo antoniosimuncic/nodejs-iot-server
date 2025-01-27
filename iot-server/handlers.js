@@ -215,50 +215,7 @@ function _Devices(req, res, q, data) {
             res.end();
             return true;
         }
-    }
-
-    // Delete existing devices from database
-    // else if (req.method == 'DELETE') {
-    //     try {
-    //         const mac_address = sp.get("mac_address");
-
-    //         const db = new sqlite.DatabaseSync("./sensor_data.db", { open: false });
-    //         db.open();
-
-    //         // Check if the device exists
-    //         const checkDeviceSql = "SELECT * FROM Devices WHERE mac_address = :mac_address";
-    //         const existingDevice = db.prepare(checkDeviceSql).get({ mac_address });
-    //         console.log(existingDevice);
-        
-    //         if (existingDevice){
-    //             // Delete device with the provided MAC address
-    //             const deleteSql = `
-    //             Delete from Devices 
-    //             WHERE mac_address = :mac_address
-    //             `;
-
-    //             db.prepare(deleteSql).run({ mac_address});
-
-    //             res.writeHead(200, { "Content-Type": "application/json" });
-    //             res.write(JSON.stringify({ message: "Device deleted successfully." }));
-    //         } else {
-    //             // Error message, no device found
-    //             res.writeHead(400, { "Content-Type": "application/json" });
-    //             res.write(JSON.stringify({ message: `Device delete failed! No device with mac_address=${mac_address} was found.` }));
-    //         }
-            
-    //         res.end()
-    //         db.close()
-    //         return true;
-    //     } catch (error) {
-    //         res.writeHead(500, { "Content-Type": "application/json" });
-    //         res.write(JSON.stringify({ message: "Internal Server Error: " + error.message}));
-    //         res.end();
-    //         return true;
-    //     }
-    // }
-
-    else {
+    } else {
         res.writeHead(405, { "Content-Type": "application/json" });
         res.write(JSON.stringify({ message: "Method not allowed." }));
         res.end();
@@ -299,28 +256,34 @@ function _SensorReadings(req, res, q, data) {
                 res.write(JSON.stringify(result));
             } 
             else {
-            // Get a specific sensor reading by device_id
-            const sql = `
-                SELECT sr.*, d.mac_address, d.device_name, d.location
-                FROM SensorReadings sr
-                INNER JOIN Devices d ON sr.device_id = d.id
-                WHERE sr.device_id = :device_id
-                ORDER BY sr.id DESC
-                LIMIT 1000
-            `;
-            const stmt = db.prepare(sql);
-            const result = stmt.all({ device_id }); 
+            // Get the last 1000 readings from specific sensor by device_id
+                const sql = `    
+                    SELECT * FROM SensorReadings
+                    WHERE device_id = :device_id
+                    ORDER BY id DESC
+                    LIMIT 100
+                `;
+                // const sql = `
+                //     SELECT sr.*, d.mac_address, d.device_name, d.location
+                //     FROM SensorReadings sr
+                //     INNER JOIN Devices d ON sr.device_id = d.id
+                //     WHERE sr.device_id = :device_id
+                //     ORDER BY sr.id DESC
+                //     LIMIT 1000  
+                // `;
+                const stmt = db.prepare(sql);
+                const result = stmt.all({ device_id }); 
 
-            if (!result[0]) {
-                res.writeHead(404, { "Content-Type": "application/json" });
-                res.write(JSON.stringify({ message: `Sensor readings with device_id=${device_id} not found.` }));
-                res.end();
-                db.close();
-                return true;
-            }
+                if (!result[0]) {
+                    res.writeHead(404, { "Content-Type": "application/json" });
+                    res.write(JSON.stringify({ message: `Sensor readings with device_id=${device_id} not found.` }));
+                    res.end();
+                    db.close();
+                    return true;
+                }
 
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.write(JSON.stringify(result));
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.write(JSON.stringify(result));
             }
 
         db.close();
@@ -363,8 +326,8 @@ function _SensorReadings(req, res, q, data) {
 
             // Insert sensor readings
             const insertSql = `
-                INSERT INTO SensorReadings (device_id, temperature, humidity, pm1, pm2_5, pm4, pm10, co2, voc, pressure)
-                VALUES (:device_id, :temperature, :humidity, :pm1, :pm2_5, :pm4, :pm10, :co2, :voc, :pressure)
+                INSERT INTO SensorReadings (device_id, temperature, humidity, pm1, pm2_5, pm4, pm10, co2, voc, pressure, timestamp)
+                VALUES (:device_id, :temperature, :humidity, :pm1, :pm2_5, :pm4, :pm10, :co2, :voc, :pressure, datetime('now', '+1 hour'))
             `;
             const insertStmt = db.prepare(insertSql);
             const result = insertStmt.run(

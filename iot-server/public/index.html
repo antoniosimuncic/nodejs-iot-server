@@ -23,6 +23,7 @@
                       <button class="add-button" id="add-button">Add Sensor</button>
                       <button class="rename-button" id="rename-button">Rename</button>
                       <button class="remove-button" id="remove-button">Remove</button>
+                      <button class="clear-button" id="clear-button">Clear</button>
                   </div>
               </section>
               <section class="device-list">
@@ -46,7 +47,8 @@
               </section>
           </div>
           <section class="charts">
-              <div class="chart" id="temperature-chart"></div>
+            <canvas id="lineChart"></canvas>
+              <!-- <div class="chart" id="temperature-chart"></div>
               <div class="chart" id="humidity-chart"></div>
               <div class="chart" id="pressure-chart"></div>
               <div class="chart" id="co2-chart"></div>
@@ -54,7 +56,7 @@
               <div class="chart" id="pm1-chart"></div>
               <div class="chart" id="pm2_5-chart"></div>
               <div class="chart" id="pm4-chart"></div>
-              <div class="chart" id="pm10-chart"></div>
+              <div class="chart" id="pm10-chart"></div> -->
           </section>
       </main>      
     </div>
