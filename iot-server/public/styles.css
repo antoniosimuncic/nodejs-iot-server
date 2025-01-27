@@ -134,7 +134,17 @@ header h1 {
   /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
 }
 
-.device-list h2 {
+.alert-list {
+  position: relative;
+  flex: 3;
+  /* max-width: 66%; */
+  background: var(--window-color);
+  border-radius: 15px;
+  padding: 20px;
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */ 
+}
+
+.device-list h2, .alert-list h2 {
   margin-top: 0;
 }
 
@@ -148,13 +158,13 @@ header h1 {
   width: 100%;
 }
 
-.device-list table {
+.device-list table, .alert-list table {
   width: 100%;
   border-collapse: collapse;
   /* margin-top: 20px; */
 }
 
-.device-list thead th {
+.device-list thead th, .alert-list thead th {
   background-color: var(--primary-color);
   color: white;
   text-align: left;
@@ -164,21 +174,21 @@ header h1 {
   z-index: 1;
 }
 
-.device-list th, .device-list td {
+.device-list th, .device-list td, .alert-list th, .alert-list td {
   padding: 10px 15px;
   text-align: left;
 }
 
-.device-list tbody tr {
+.device-list tbody tr, .alert-list tbody tr {
   border-bottom: 1px solid #ddd;
 }
 
 
-.device-list tbody tr:nth-of-type(even) {
+.device-list tbody tr:nth-of-type(even), .alert-list tbody tr:nth-of-type(even) {
   background-color: #3e3e42;
 }
 
-.device-list tbody tr:last-of-type {
+.device-list tbody tr:last-of-type, .alert-list tbody tr:last-of-type {
   border-bottom: 2px solid var(--primary-color);
 }
 
@@ -197,6 +207,7 @@ header h1 {
 /***** Charts *****/
 
 .charts {
+  margin-top: 20px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid for charts */
   gap: 20px;
@@ -207,7 +218,7 @@ header h1 {
   border-radius: 10px;
   padding: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  min-height: 400px;
+  /* min-height: 400px; */
 }
 
 .chart-container canvas {
@@ -244,7 +255,7 @@ header h1 {
     padding: 10px 15px;
   }
 
-  .device-list table {
+  .device-list table, .alert-list table {
     font-size: 0.7em;
     display: block;
     overflow-x: auto;

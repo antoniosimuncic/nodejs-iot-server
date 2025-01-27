@@ -46,18 +46,35 @@
                   </div>
               </section>
           </div>
+          <section class="alert-list">
+            <h2>Alert List</h2>
+            <div class="scrollable-table" id="alert-list-container">
+              <table id="alert-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Alert Type</th>
+                    <th>MAC Address</th>
+                    <th>Created At</th>
+                  </tr>
+                </thead>
+                <td>Select a Device in "Device List"</td>
+                <tbody id="alert-table-body">
+                </tbody>
+              </table>
+            </div>
+          </section>
           <section class="charts">
-            <canvas id="lineChart"></canvas>
               <!-- <div class="chart" id="temperature-chart"></div>
               <div class="chart" id="humidity-chart"></div>
               <div class="chart" id="pressure-chart"></div>
               <div class="chart" id="co2-chart"></div>
               <div class="chart" id="voc-chart"></div>
-              <div class="chart" id="pm1-chart"></div>
-              <div class="chart" id="pm2_5-chart"></div>
-              <div class="chart" id="pm4-chart"></div>
-              <div class="chart" id="pm10-chart"></div> -->
+              <div class="chart" id="pm-chart"></div>-->
           </section>
+          
       </main>      
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

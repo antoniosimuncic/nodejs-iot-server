@@ -167,10 +167,10 @@ function fetchAndHighlightClickedRow() {
       document.getElementById('location').value = location;
 
       clickedRowId = parseInt(clickedRow.querySelector('.active-row td').innerText, 10);
-      //console.log(clickedRowId);
-      selectedRowIndex = clickedRowId;
+      
+      fetchSensorReadings(clickedRowId);
+      fetchSensorAlerts(clickedRowId);
 
-      fetchSensorReadings(selectedRowIndex);
   });
 }
 
@@ -179,154 +179,49 @@ function fetchAndHighlightClickedRow() {
 
 /************************ Chart data ************************/
 
-// 
+
 async function fetchSensorReadings(device_id) {
   try {
       const response = await fetch(`/sensor-readings?device_id=${device_id}`); 
 
       if (!response.ok) {
-          throw new Error(`Error fetching devices: ${response.statusText}`);
+        drawCharts([]);
+        throw new Error(`Error fetching devices: ${response.statusText}`);
       }
-
+      
       const readings = await response.json();
-      // display readings HERE!
-      console.log(readings);
-      drawCharts(readings);
+      if (response.ok) {
+        drawCharts(readings);
+      }
       return readings;
   } catch (error) {
       console.error('Error:', error);
   }
 }
 
-// Function to draw charts
-function drawChartsdas(data) {
-  const chartsContainer = document.querySelector('.charts');
 
-  const timestamp = data.map(entry => entry.timestamp);
-  const temperature = data.map(entry => entry.temperature);
-  const humidity = data.map(entry => entry.humidity);
-  const co2 = data.map(entry => entry.co2);
-  const pressure = data.map(entry => entry.pressure);
-  const voc = data.map(entry => entry.voc);
-  const pm1 = data.map(entry => entry.pm1);
-  const pm2_5 = data.map(entry => entry.pm2_5);
-  const pm4 = data.map(entry => entry.pm4);
-  const pm10 = data.map(entry => entry.pm10);
+async function fetchSensorAlerts(device_id) {
+  try {
+      const response = await fetch(`/alerts?device_id=${device_id}`); 
 
-
-  if (!chartsContainer) {
-      console.error('Charts container not found.');
-      return;
-  }
-
-  // Clear any existing charts
-  chartsContainer.innerHTML = '';
-
-  // Keys to be displayed as charts
-  const chartKeys = ['temperature', 'humidity', 'co2','pressure', 'voc', 'pm1', 'pm2_5', 'pm4', 'pm10'];
-
-  // Loop through each key and create a chart
-  chartKeys.forEach((key) => {
-      // Create a container for the chart
-      const chartContainer = document.createElement('div');
-      chartContainer.classList.add('chart-container');
-
-      // Create a canvas for Chart.js
-      const canvas = document.createElement('canvas');
-      canvas.id = `${key}-chart`;
-      chartContainer.appendChild(canvas);
-      chartsContainer.appendChild(chartContainer);
-
-      // Create the chart
-      new Chart(canvas, {
-          type: 'bar', // Choose your chart type (bar, line, pie, etc.)
-          data: {
-              labels: [key], // X-axis labels
-              datasets: [
-                {
-                  label: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize key for the label
-                  data: [data[key]], // Chart data
-                  backgroundColor: 'rgba(0, 123, 255, 0.6)', // Bar color
-                  borderColor: 'rgba(0, 123, 255, 1)', // Border color
-                  borderWidth: 1,
-                }
-              ],
-          },
-          options: {
-              responsive: true,
-              plugins: {
-                  legend: {
-                      display: true,
-                      position: 'top',
-                  },
-              },
-              scales: {
-                  x: {
-                      beginAtZero: true,
-                  },
-                  y: {
-                      beginAtZero: true,
-                  },
-              },
-          },
-      });
-  });
-}
-
-
-
-
-
-function drawChartsda(data) {
-  // Extract timestamps, temperatures, and humidities
-  const timestamps = data.map(entry => entry.timestamp);
-  const temperatures = data.map(entry => entry.temperature);
-  const humidities = data.map(entry => entry.humidity);
-
-  // Create the line chart
-  const ctx = document.getElementById('lineChart').getContext('2d');
-  const lineChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: timestamps.reverse(), // Reverse for chronological order
-        datasets: [
-            {
-                label: 'Temperature (°C)',
-                data: temperatures.reverse(),
-                borderColor: 'rgba(255,99,132,1)',
-                backgroundColor: 'rgba(255,99,132,0.2)',
-                fill: true
-            },
-            {
-                label: 'Humidity (%)',
-                data: humidities.reverse(),
-                borderColor: 'rgba(54,162,235,1)',
-                backgroundColor: 'rgba(54,162,235,0.2)',
-                fill: true
-            }
-        ]
-    },
-    options: {
-      responsive: true,
-      scales: {
-          x: {
-              title: {
-                  display: true,
-                  text: 'Timestamp'
-              }
-          },
-          y: {
-              title: {
-                  display: true,
-                  text: 'Values'
-              }
-          }
+      if (!response.ok) {
+        drawAlertTable([]);
+        console.log(alerts);
+        throw new Error(`Error fetching devices: ${response.statusText}`);
       }
-    }
-  });
+      
+      const alerts = await response.json();
+      if (response.ok) {
+        drawAlertTable(alerts);
+        console.log(alerts);
+      }
+      return alerts;
+  } catch (error) {
+      console.error('Error:', error);
+  }
 }
 
-// NOVIIII
+
 function drawCharts(data) {
   const chartsContainer = document.querySelector('.charts');
 
@@ -490,8 +385,49 @@ function drawCharts(data) {
 }
 
 
+function drawAlertTable(alerts) {
+  const alertListContainer = document.getElementById('alert-list-container');
+
+  if (!alertListContainer) {
+    console.error('Charts container not found.');
+    return;
+  }
+
+  alertListContainer.innerHTML = `
+    <table id="alert-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Location</th>
+          <th>Alert Type</th>
+          <th>MAC Address</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody id="alert-list-body">
+      </tbody>
+    </table>
+  `;
+
+  const deviceListBody = document.getElementById('alert-list-body');
+
+  alerts.forEach(item => {
+    const tableRow = document.createElement("tr");
+    tableRow.innerHTML = `
+        <td>${item.id}</td>
+        <td>${item.device_name}</td>
+        <td>${item.location}</td>
+        <td>${item.alert_type}</td>
+        <td>${item.mac_address}</td>
+        <td>${item.created_at}</td>
+    `;
+    deviceListBody.appendChild(tableRow);
+  });
+}
+
+
 /******************** Init Function ********************/
-let selectedRowIndex = null;
 
 // Initialize the application
 function initApp() {
@@ -501,8 +437,6 @@ function initApp() {
   document.getElementById('remove-button').addEventListener('click', () => manageSensor('remove'));
   document.getElementById('clear-button').addEventListener('click', () => manageSensor('clear'));
   document.getElementById('refresh-button').addEventListener('click', () => fetchDeviceList());
-
-
 
   // Initial data fetch when page loads
   fetchDeviceList();
