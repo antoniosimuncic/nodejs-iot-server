@@ -75,7 +75,7 @@ This project implements a simple server to receive, store, and retrieve IoT sens
 
 2. **Get Devices** (GET `/devices`):
    - Returns a list of all registered devices, including their `mac_address`, `device_name`, `location`, and `last_active`.
-   - Possible to filter request by using id or device_id to specify wanted results.
+   - Possible to filter request by using device_id to specify wanted results.
 
 3. **Update an Existing Device** (PUT `/devices`):
    - Request body:
@@ -88,7 +88,7 @@ This project implements a simple server to receive, store, and retrieve IoT sens
    ```
    - API:
       1. Looks up the `Devices` table using the provided `mac_address`.
-      2. If not found, returns: `400` - message: "Device update failed! No such device was found."
+      2. If not found, returns: `404` - message: "Device not found! No changes were made."
       3. If found, sets the new values in `Devices` and returns: `200` - message: "Device updated successfully."
       4. If an internal error occurs, returns: `500` - message: "Internal Server Error: " + `error.message`
 
@@ -96,9 +96,7 @@ This project implements a simple server to receive, store, and retrieve IoT sens
    - Request body:
    ```json
    {
-     "mac_address": "AA:BB:CC:DD:EE:FF",
-     "device_name": "ESP32-S3",
-     "location": "Office"
+     "mac_address": "AA:BB:CC:DD:EE:FF"
    }
    ```
    - API:
@@ -108,7 +106,6 @@ This project implements a simple server to receive, store, and retrieve IoT sens
       4. If an internal error occurs, returns: `500` - message: "Internal Server Error: " + `error.message`
 
 
-# TODO
 2. **Send Sensor Readings** (POST `/sensor-readings`):
    - Request body:
      ```json
@@ -128,18 +125,25 @@ This project implements a simple server to receive, store, and retrieve IoT sens
    - API:
      1. Looks up the `Devices` table using the provided `mac_address`.
      2. If found, inserts the readings into the `SensorReadings` table.
-     3. Updates the `last_active` field for the device.
+     3. Automatically update the `last_active` field for the device with a timestamp (UTC+1).
 
 3. **Get All Sensor Readings** (GET `/sensor-readings`):
-   - Returns the latest readings for each device.
+   - Returns the latest readings for every device including their `device_name` and `location` from `Devices` table.
+   - Possible to query specific devices via `/sensor-readings?device_id=${device_id}`
 
-4. **Get Devices** (GET `/devices`):
-   - Returns a list of all registered devices, including their `mac_address`, `device_name`, `location`, and `last_active`.
+4. **Get All Devices** (GET `/devices`):
+   - Returns a list of all registered devices.
+   - Possible to query specific devices via `/devices?device_id=${device_id}`
 
-5. **Generate Alerts**:
-   - If CO2 or VOC levels exceed a specified threshold, the API can store an alert in the `Alerts` table.
+5. **Get All Alerts** (GET `/alerts`):
+  - Returns a list of all previous alerts.
+  - Possible to query specific devices via `/alerts?device_id=${device_id}`
 
+**Alerts**:
+   - If CO2, Temperature, or Humidity levels exceed a specified threshold, the API will store an alert in the `Alerts` table.
+   - Thresholds are set in `handlers.js`.
 ---
+
 
 
 
