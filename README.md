@@ -18,6 +18,22 @@ This project implements a simple server to receive, store, and retrieve IoT sens
 
 ### Functionalities:
 
+1. Threshold Monitoring
+   - A function, `checkThresholds()`, evaluates sensor readings and generates alerts if values exceed predefined thresholds.
+
+2. Device Management
+   - Add, list, modify, and delete devices.
+   - Devices are identified by their MAC address.
+
+3. Sensor Data Management
+   - Log sensor readings with timestamps.
+   - Retrieve readings for a specific device or all devices.
+
+4. Alert Management
+   - Automatically generate alerts when thresholds are exceeded.
+   - Retrieve recent alerts.  
+
+
 | Endpoint            | Method | Description                                    |
 |---------------------|--------|------------------------------------------------|
 | `/devices`          | POST   | Add a new device                               |
@@ -136,15 +152,158 @@ This project implements a simple server to receive, store, and retrieve IoT sens
    - Possible to query specific devices via `/devices?device_id=${device_id}`
 
 5. **Get All Alerts** (GET `/alerts`):
-  - Returns a list of all previous alerts.
-  - Possible to query specific devices via `/alerts?device_id=${device_id}`
+   - Returns a list of all previous alerts.
+   - Possible to query specific devices via `/alerts?device_id=${device_id}`
 
 **Alerts**:
    - If CO2, Temperature, or Humidity levels exceed a specified threshold, the API will store an alert in the `Alerts` table.
    - Thresholds are set in `handlers.js`.
+
 ---
 
+### Code Structure
+- `handlers.js`: Contains all the main request handlers for the API.
+- **Database**: SQLite is used to store device data, sensor readings, and alerts in three tables:
+`Devices`: Stores device information.
+`SensorReadings`: Stores readings for temperature, humidity, CO2, particulate matter, etc.
+`Alerts`: Tracks threshold exceedances and timestamps.
 
+---
 
+Sample Code Snippets
+1. Threshold Checking
+The `checkThresholds` function compares sensor readings against defined limits and returns a list of alerts.
+
+   ```javascript
+   const THRESHOLDS = {
+       temperature: 35, 
+       humidity: 70, 
+       pm1: 200, 
+       pm2_5: 200,
+       pm4: 250,
+       pm10: 300,
+       co2: 1500,
+       voc: 400,
+       pressure: 1013.25
+   };
+   
+   function checkThresholds(sensorData) {
+       const alerts = [];
+       for (const [key, value] of Object.entries(sensorData)) {
+           if (THRESHOLDS[key] && value > THRESHOLDS[key]) {
+               alerts.push(`High ${key}`);
+           }
+       }
+       return alerts;
+   }
+   ```
+
+2. Device Management
+   - Add a New Device:
+
+   ```javascript
+   const insertSql = `
+       INSERT INTO Devices (mac_address, device_name, location) 
+       VALUES (:mac_address, :device_name, :location)
+   `;
+   const result = db.prepare(insertSql).run(params);
+   ```
+   - Retrieve All Devices:
+
+   ```javascript
+   const sql = "SELECT * FROM Devices";
+   const devices = db.prepare(sql).all();
+   ```
+
+3. Sensor Data Logging
+When sensor data is received, it is:
+
+   - Logged into the `SensorReadings` table.
+   - Checked against thresholds to generate alerts.
+   ```javascript
+   const insertReadingSql = `
+       INSERT INTO SensorReadings (device_id, temperature, humidity, pm1, pm2_5, pm4, pm10, co2, voc, pressure, timestamp)
+       VALUES (:device_id, :temperature, :humidity, :pm1, :pm2_5, :pm4, :pm10, :co2, :voc, :pressure, datetime('now'))
+   `;
+   db.prepare(insertReadingSql).run(sensorData);
+   
+   // Generate alerts
+   if (sensorData.temperature > THRESHOLDS.temperature) {
+       alertStmt.run({ device_id: sensorData.device_id, alert_type: 'High temperature' });
+   }
+   ```
+
+4. Alerts Retrieval
+The API allows retrieving alerts either for all devices or a specific one.
+
+   ```javascript
+   const sql = `
+       SELECT Alerts.*, Devices.mac_address, Devices.device_name, Devices.location 
+       FROM Alerts
+       INNER JOIN Devices ON Alerts.device_id = Devices.id
+       WHERE device_id = :device_id
+       ORDER BY created_at DESC
+       LIMIT 50
+   `;
+   const alerts = db.prepare(sql).all({ device_id });
+   ```
+
+### API Endpoints
+The following endpoints are implemented in `handlers.js`:
+
+- Devices: `/devices`
+   - GET: List all devices or a specific one by MAC address.
+   - POST: Add a new device.
+   - PUT: Modify an existing device.
+   - DELETE: Remove a device.
+
+- Sensor Readings: `/sensor-readings`
+   - GET: List sensor readings (all or by device).
+   - POST: Add new sensor readings.
+
+- Alerts: `/alerts`
+   - GET: Retrieve recent alerts (all or by device).
+
+### Database Schema
+1. Devices Table
+```sql
+CREATE TABLE Devices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mac_address TEXT UNIQUE NOT NULL,
+    device_name TEXT NOT NULL,
+    location TEXT,
+    last_active TIMESTAMP
+);
+```
+
+2. SensorReadings Table
+```sql
+CREATE TABLE SensorReadings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    device_id INTEGER,
+    temperature REAL,
+    humidity REAL,
+    pm1 REAL,
+    pm2_5 REAL,
+    pm4 REAL,
+    pm10 REAL,
+    co2 REAL,
+    voc REAL,
+    pressure REAL,
+    timestamp DATETIME,
+    FOREIGN KEY (device_id) REFERENCES Devices (id)
+);
+```
+
+3. Alerts Table
+```sql
+CREATE TABLE Alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    device_id INTEGER,
+    alert_type TEXT NOT NULL,
+    created_at DATETIME,
+    FOREIGN KEY (device_id) REFERENCES Devices (id)
+);
+```
 
 
