@@ -2,12 +2,10 @@
 
 async function manageSensor(action) {
   try {
-      // Get input values
       const macAddress = document.getElementById('mac_address').value.trim();
       const deviceName = document.getElementById('device_name').value.trim();
       const location = document.getElementById('location').value.trim();
 
-      // Validate inputs
       if (!macAddress) {
           alert("MAC Address is required.");
           return;
@@ -17,7 +15,6 @@ async function manageSensor(action) {
       let method;
       let body = null;
 
-      // Determine action
       if (action === 'add') {
           if (!deviceName || !location) {
               alert("Device Name and Location are required to add a sensor.");
@@ -45,7 +42,6 @@ async function manageSensor(action) {
           return;
       }
 
-      // Perform the fetch
       const response = await fetch(url, {
           method,
           headers: {
@@ -72,7 +68,7 @@ async function manageSensor(action) {
 
 /************************ Device List ************************/
 
-// Function to fetch device list from the server
+
 async function fetchDeviceList() {
   try {
       const response = await fetch('/devices');
@@ -90,7 +86,6 @@ async function fetchDeviceList() {
 }
 
 
-// Function to display the device list
 function displayDeviceList(devices) {
   const deviceListContainer = document.getElementById('device-list-container');
   
@@ -142,17 +137,15 @@ function fetchAndHighlightClickedRow() {
   }
 
   tableBody.addEventListener('click', (event) => {
-      const clickedRow = event.target.closest('tr'); // Get the closest <tr> to the clicked element
+      const clickedRow = event.target.closest('tr');
 
       if (!clickedRow) {
-          return; // If no <tr> is clicked, do nothing
+          return;
       }
 
-      // Remove the 'active-row' class from all rows
       const rows = tableBody.querySelectorAll('tr');
       rows.forEach((row) => row.classList.remove('active-row'));
 
-      // Add the 'active-row' class to the clicked row
       clickedRow.classList.add('active-row');
 
       const activeRow = clickedRow.querySelectorAll('.active-row td');
@@ -429,20 +422,16 @@ function drawAlertTable(alerts) {
 
 /******************** Init Function ********************/
 
-// Initialize the application
 function initApp() {
-  // Button Event Listeners
   document.getElementById('add-button').addEventListener('click', () => manageSensor('add'));
   document.getElementById('rename-button').addEventListener('click', () => manageSensor('rename'));
   document.getElementById('remove-button').addEventListener('click', () => manageSensor('remove'));
   document.getElementById('clear-button').addEventListener('click', () => manageSensor('clear'));
   document.getElementById('refresh-button').addEventListener('click', () => fetchDeviceList());
 
-  // Initial data fetch when page loads
   fetchDeviceList();
 }
 
-// Wait for the DOM to fully load before initializing
 document.addEventListener('DOMContentLoaded', initApp);
 
 
